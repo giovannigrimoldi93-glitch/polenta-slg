@@ -147,9 +147,10 @@
 
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem">
     <h1 style="font-size:1.6rem">Prenotazioni</h1>
-    <div style="display:flex;gap:0.5rem">
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
       <button class="btn btn-outline btn-sm" onclick="loadBookings()">🔄 Aggiorna</button>
       <button class="btn btn-gold btn-sm" onclick="exportCSV()">⬇️ Esporta CSV</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteAll()">🗑️ Elimina tutti</button>
     </div>
   </div>
 
@@ -336,7 +337,8 @@ function renderTable() {
       <td>
         <div class="actions-cell">
           ${b.status !== 'paid' && b.status !== 'cancelled' ? `<button class="btn btn-sm btn-gold" onclick="markPaid('${b.id}')">✅ Pagato</button>` : ''}
-          ${b.status !== 'cancelled' ? `<button class="btn btn-sm btn-danger" onclick="cancelBooking('${b.id}')">✕</button>` : ''}
+          ${b.status !== 'cancelled' ? `<button class="btn btn-sm btn-danger" onclick="cancelBooking('${b.id}')">✕ Annulla</button>` : ''}
+          <button class="btn btn-sm btn-outline" onclick="deleteBooking('${b.id}')" style="color:var(--red-soft)" title="Elimina definitivamente">🗑️</button>
         </div>
       </td>
     </tr>`;
@@ -346,6 +348,27 @@ function renderTable() {
 // ============================================================
 // ACTIONS
 // ============================================================
+async function deleteBooking(id) {
+  if (!confirm('Eliminare definitivamente questa prenotazione? L\'operazione è irreversibile.')) return;
+  await fetch('/api/delete-booking', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ id })
+  });
+  await loadBookings();
+}
+
+async function deleteAll() {
+  if (!confirm('⚠️ Eliminare TUTTE le prenotazioni? Questa operazione è irreversibile!')) return;
+  if (!confirm('Sei sicuro? Verranno eliminati tutti gli ordini, inclusi quelli pagati.')) return;
+  await fetch('/api/delete-booking', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ deleteAll: true })
+  });
+  await loadBookings();
+}
+
 async function markPaid(id) {
   if (!confirm('Segna questa prenotazione come pagata?')) return;
   await fetch('/api/update-booking', {
