@@ -452,7 +452,8 @@ async function saveBooking(paymentMethod, transactionId) {
 
   // Satispay redirect
   if (paymentMethod === 'satispay' && config.satispayLink) {
-    const link = config.satispayLink + (config.satispayLink.includes('?') ? '&' : '?') + `amount=${getTotal()}&ref=${result.id}`;
+    const importoCentesimi = Math.round(getTotal() * 100);
+    const link = config.satispayLink + (config.satispayLink.includes("?") ? "&" : "?") + `amount=${importoCentesimi}&ref=${result.id}`;
     window.location.href = link;
     return;
   }
