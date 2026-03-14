@@ -408,6 +408,48 @@ async function saveBooking(paymentMethod, transactionId) {
 
   const result = await res.json();
 
+  // Send email via EmailJS from browser
+  if (config.emailjsServiceId && config.emailjsTemplateId && config.emailjsPublicKey) {
+    try {
+      const itemsStr = (booking.items || []).map(i => `${i.qty}× ${i.name} (€${(i.qty * parseFloat(i.price)).toFixed(2)})`).join('\n');
+      const metodiLabel = { paypal: 'PayPal', satispay: 'Satispay', secretariat: 'Segreteria parrocchiale' };
+      const templateParams = {
+        to_email: booking.email,
+        nome: booking.nome,
+        cognome: booking.cognome,
+        booking_id: result.id.substring(0, 8).toUpperCase(),
+        items: itemsStr,
+        totale: `€${(booking.total || 0).toFixed(2)}`,
+        metodo: metodiLabel[booking.paymentMethod] || booking.paymentMethod,
+        stato: booking.status === 'paid' ? 'Pagamento confermato ✅' : 'In attesa di pagamento ⏳',
+        note: booking.note || '–'
+      };
+      await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: config.emailjsServiceId,
+          template_id: config.emailjsTemplateId,
+          user_id: config.emailjsPublicKey,
+          template_params: templateParams
+        })
+      });
+      // Notify admin
+      if (config.adminEmail) {
+        await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: config.emailjsServiceId,
+            template_id: config.emailjsTemplateId,
+            user_id: config.emailjsPublicKey,
+            template_params: { ...templateParams, to_email: config.adminEmail, stato: `Nuova prenotazione da ${booking.nome} ${booking.cognome}` }
+          })
+        });
+      }
+    } catch(emailErr) { console.error('Email error:', emailErr); }
+  }
+
   // Satispay redirect
   if (paymentMethod === 'satispay' && config.satispayLink) {
     const link = config.satispayLink + (config.satispayLink.includes('?') ? '&' : '?') + `amount=${getTotal()}&ref=${result.id}`;

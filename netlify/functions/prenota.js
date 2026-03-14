@@ -61,48 +61,7 @@ exports.handler = async (event) => {
     bookings.push(booking);
     await jsonbinPut(bookingsBinId, apiKey, { bookings });
 
-    // Send email via EmailJS
-    if (config.emailjsServiceId && config.emailjsTemplateId && config.emailjsPublicKey) {
-      try {
-        const itemsStr = (booking.items || []).map(i => `${i.qty}× ${i.name} (€${(i.qty * parseFloat(i.price)).toFixed(2)})`).join('\n');
-        const metodiLabel = { paypal: 'PayPal', satispay: 'Satispay', secretariat: 'Segreteria parrocchiale' };
-        const templateParams = {
-          to_email: booking.email,
-          nome: booking.nome,
-          cognome: booking.cognome,
-          booking_id: id.substring(0, 8).toUpperCase(),
-          items: itemsStr,
-          totale: `€${(booking.total || 0).toFixed(2)}`,
-          metodo: metodiLabel[booking.paymentMethod] || booking.paymentMethod,
-          stato: booking.status === 'paid' ? 'Pagamento confermato ✅' : 'In attesa di pagamento ⏳',
-          note: booking.note || '–'
-        };
-        await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            service_id: config.emailjsServiceId,
-            template_id: config.emailjsTemplateId,
-            user_id: config.emailjsPublicKey,
-            template_params: templateParams
-          })
-        });
-        if (config.adminEmail) {
-          await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              service_id: config.emailjsServiceId,
-              template_id: config.emailjsTemplateId,
-              user_id: config.emailjsPublicKey,
-              template_params: { ...templateParams, to_email: config.adminEmail, nome: 'Admin', cognome: '', stato: `Nuova prenotazione da ${booking.nome} ${booking.cognome}` }
-            })
-          });
-        }
-      } catch(emailErr) { console.error('Email error:', emailErr); }
-    }
-
-    return { statusCode: 200, headers: CORS, body: JSON.stringify({ id, ok: true }) };
+    return { statusCode: 200, headers: CORS, body: JSON.stringify({ id, ok: true, booking }) };
   } catch(e) {
     console.error(e);
     return { statusCode: 500, headers: CORS, body: JSON.stringify({ message: 'Errore server: ' + e.message }) };
