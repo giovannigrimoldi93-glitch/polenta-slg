@@ -453,7 +453,8 @@ async function saveBooking(paymentMethod, transactionId) {
   // Satispay redirect
   if (paymentMethod === 'satispay' && config.satispayLink) {
     const importoCentesimi = Math.round(getTotal() * 100);
-    const link = config.satispayLink + (config.satispayLink.includes("?") ? "&" : "?") + `amount=${importoCentesimi}&ref=${result.id}`;
+    const redirectUrl = encodeURIComponent(`https://polentata-slg.netlify.app/grazie.html?id=${result.id}&nome=${encodeURIComponent(booking.nome)}&metodo=satispay`);
+const link = config.satispayLink + (config.satispayLink.includes("?") ? "&" : "?") + `amount=${importoCentesimi}&ref=${result.id}&redirect_url=${redirectUrl}`;
     window.location.href = link;
     return;
   }
