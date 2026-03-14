@@ -1,0 +1,8 @@
+{
+  "name": "pranzo-parrocchia",
+  "version": "1.0.0",
+  "description": "Sistema prenotazioni pranzo parrocchiale",
+  "dependencies": {
+    "@netlify/blobs": "^7.0.0"
+  }
+}

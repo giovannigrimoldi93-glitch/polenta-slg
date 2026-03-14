@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impostazioni – Pranzo in Parrocchia</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .admin-nav {
+      background: var(--brown-dark);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .admin-nav .brand { color: var(--cream); font-family: var(--font-display); font-size: 1.1rem; }
+    .admin-nav .nav-links { display: flex; gap: 0.5rem; }
+    .admin-nav a {
+      color: rgba(249,244,236,0.75); text-decoration: none;
+      font-size: 0.87rem; padding: 0.35rem 0.8rem; border-radius: 6px; transition: all 0.15s;
+    }
+    .admin-nav a:hover, .admin-nav a.active { background: rgba(255,255,255,0.12); color: var(--cream); }
+    .menu-item-editor {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      position: relative;
+    }
+    .menu-item-editor .item-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 100px auto;
+      gap: 0.75rem;
+      align-items: end;
+    }
+    @media (max-width: 600px) {
+      .menu-item-editor .item-row { grid-template-columns: 1fr 1fr; }
+    }
+    .drag-handle {
+      cursor: grab;
+      color: var(--border);
+      font-size: 1.2rem;
+      padding: 0 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .toggle {
+      position: relative;
+      width: 44px; height: 24px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--green); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .login-overlay {
+      position: fixed; inset: 0; background: var(--cream);
+      display: flex; align-items: center; justify-content: center; z-index: 999;
+    }
+    .login-box {
+      background: var(--warm-white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 2.5rem 2rem; width: 100%; max-width: 360px;
+      text-align: center; box-shadow: 0 8px 32px var(--shadow-deep);
+    }
+    .login-box h2 { margin-bottom: 0.5rem; }
+    .login-box p { color: var(--brown-light); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    #login-error { color: var(--red-soft); font-size: 0.85rem; margin-top: 0.5rem; min-height: 1.2em; }
+    .save-toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: var(--green); color: white;
+      padding: 0.75rem 1.25rem; border-radius: 10px;
+      font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      transform: translateY(100px); opacity: 0;
+      transition: all 0.3s; z-index: 100;
+    }
+    .save-toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div style="font-size:2.5rem;margin-bottom:0.5rem">🔐</div>
+    <h2>Area Admin</h2>
+    <p>Inserisci la password per accedere</p>
+    <div class="form-group">
+      <input type="password" id="pwd-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()">Accedi</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<nav class="admin-nav">
+  <div class="brand">🍲 Pranzo in Parrocchia · Admin</div>
+  <div class="nav-links">
+    <a href="index.html">📋 Prenotazioni</a>
+    <a href="impostazioni.html" class="active">⚙️ Impostazioni</a>
+    <a href="/" target="_blank">🌐 Sito pubblico</a>
+    <a href="#" onclick="logout()">Esci</a>
+  </div>
+</nav>
+
+<div class="container" style="max-width:860px">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem">
+    <h1 style="font-size:1.6rem">Impostazioni evento</h1>
+    <button class="btn btn-primary" style="width:auto;padding:0.75rem 2rem" onclick="saveAll()">
+      💾 Salva tutto
+    </button>
+  </div>
+
+  <!-- EVENTO -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📅</span> Dettagli evento</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Data del pranzo</label>
+        <input type="date" id="cfg-eventDate" />
+      </div>
+      <div class="form-group">
+        <label>Scadenza prenotazioni</label>
+        <input type="date" id="cfg-bookingDeadline" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Posti massimi</label>
+        <input type="number" id="cfg-maxSeats" min="1" placeholder="320" />
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:0.75rem;padding-top:1.5rem">
+        <label style="margin:0">Prenotazioni aperte</label>
+        <label class="toggle">
+          <input type="checkbox" id="cfg-bookingOpen" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🍽️</span> Voci di menù</div>
+    <div id="menu-items-list"></div>
+    <button class="btn btn-outline btn-sm" style="margin-top:0.75rem" onclick="addMenuItem()">
+      + Aggiungi voce
+    </button>
+  </div>
+
+  <!-- PAGAMENTI -->
+  <div class="card">
+    <div class="card-title"><span class="icon">💳</span> Pagamenti</div>
+    <div class="form-group">
+      <label>PayPal Client ID</label>
+      <input type="text" id="cfg-paypalClientId" placeholder="AaBbCc... (dal tuo account PayPal Developer)" />
+    </div>
+    <div class="form-group">
+      <label>Link Satispay (con importo variabile)</label>
+      <input type="url" id="cfg-satispayLink" placeholder="https://pos.satispay.com/..." />
+    </div>
+    <div class="alert alert-info" style="margin-top:0.5rem">
+      <span>ℹ️</span>
+      <span>Per disabilitare un metodo di pagamento, lascia il campo vuoto.</span>
+    </div>
+  </div>
+
+  <!-- EMAIL -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📧</span> Email</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>EmailJS Service ID</label>
+        <input type="text" id="cfg-emailjsServiceId" placeholder="service_xxxxxxx" />
+      </div>
+      <div class="form-group">
+        <label>EmailJS Template ID</label>
+        <input type="text" id="cfg-emailjsTemplateId" placeholder="template_xxxxxxx" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>EmailJS Public Key</label>
+      <input type="text" id="cfg-emailjsPublicKey" placeholder="xxxxxxxxxxxxxxxxx" />
+    </div>
+    <div class="form-group">
+      <label>Email admin (notifiche nuove prenotazioni)</label>
+      <input type="email" id="cfg-adminEmail" placeholder="parroco@parrocchia.it" />
+    </div>
+    <div class="alert alert-warning" style="margin-top:0.5rem">
+      <span>💡</span>
+      <span>Crea un account gratuito su <strong>emailjs.com</strong> e configura un template con variabili: <code>{{nome}}</code>, <code>{{cognome}}</code>, <code>{{email}}</code>, <code>{{totale}}</code>, <code>{{metodo}}</code>, <code>{{items}}</code>.</span>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="saveAll()" style="margin-top:0.5rem">
+    💾 Salva tutto
+  </button>
+
+</div>
+
+<div class="save-toast" id="save-toast">✅ Impostazioni salvate!</div>
+
+<script>
+let adminToken = '';
+let menuItems = [];
+
+// ============================================================
+// LOGIN
+// ============================================================
+function doLogin() {
+  const pwd = document.getElementById('pwd-input').value;
+  fetch('/api/admin-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd })
+  }).then(r => r.json()).then(data => {
+    if (data.token) {
+      adminToken = data.token;
+      sessionStorage.setItem('adminToken', adminToken);
+      document.getElementById('login-overlay').style.display = 'none';
+      loadConfig();
+    } else {
+      document.getElementById('login-error').textContent = 'Password errata.';
+    }
+  });
+}
+function logout() { sessionStorage.removeItem('adminToken'); location.reload(); }
+function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }; }
+
+// ============================================================
+// LOAD CONFIG
+// ============================================================
+async function loadConfig() {
+  const res = await fetch('/api/get-config', { headers: authHeaders() });
+  const cfg = await res.json();
+  menuItems = cfg.menuItems || getDefaultMenuItems();
+
+  if (cfg.eventDate) document.getElementById('cfg-eventDate').value = cfg.eventDate.split('T')[0];
+  if (cfg.bookingDeadline) document.getElementById('cfg-bookingDeadline').value = cfg.bookingDeadline.split('T')[0];
+  document.getElementById('cfg-maxSeats').value = cfg.maxSeats || 320;
+  document.getElementById('cfg-bookingOpen').checked = cfg.bookingOpen !== false;
+  document.getElementById('cfg-paypalClientId').value = cfg.paypalClientId || '';
+  document.getElementById('cfg-satispayLink').value = cfg.satispayLink || '';
+  document.getElementById('cfg-emailjsServiceId').value = cfg.emailjsServiceId || '';
+  document.getElementById('cfg-emailjsTemplateId').value = cfg.emailjsTemplateId || '';
+  document.getElementById('cfg-emailjsPublicKey').value = cfg.emailjsPublicKey || '';
+  document.getElementById('cfg-adminEmail').value = cfg.adminEmail || 'giovanni.grimoldi93@gmail.com';
+
+  renderMenuItems();
+}
+
+function getDefaultMenuItems() {
+  return [
+    { id: 'adulto', name: 'Polenta – Adulto', description: 'Porzione adulto', price: '12.00' },
+    { id: 'bambino', name: 'Polenta – Bambino', description: 'Porzione bambino', price: '10.00' },
+    { id: 'dolce', name: 'Dolce', description: 'Aggiunta dolce', price: '2.00' },
+  ];
+}
+
+// ============================================================
+// MENU ITEMS EDITOR
+// ============================================================
+function renderMenuItems() {
+  const container = document.getElementById('menu-items-list');
+  container.innerHTML = menuItems.map((item, i) => `
+    <div class="menu-item-editor" data-index="${i}">
+      <div class="item-row">
+        <div class="form-group" style="margin:0">
+          <label>Nome voce</label>
+          <input type="text" value="${item.name}" onchange="updateItem(${i},'name',this.value)" placeholder="es. Polenta adulto" />
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Descrizione (opz.)</label>
+          <input type="text" value="${item.description||''}" onchange="updateItem(${i},'description',this.value)" placeholder="es. Porzione adulto" />
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Prezzo €</label>
+          <input type="number" step="0.50" min="0" value="${item.price}" onchange="updateItem(${i},'price',this.value)" placeholder="0.00" />
+        </div>
+        <div style="padding-bottom:0.25rem">
+          <button class="btn btn-danger btn-sm" onclick="removeItem(${i})" title="Elimina">✕</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateItem(index, field, value) {
+  menuItems[index][field] = value;
+}
+
+function addMenuItem() {
+  menuItems.push({ id: 'item_' + Date.now(), name: '', description: '', price: '0.00' });
+  renderMenuItems();
+}
+
+function removeItem(index) {
+  if (!confirm('Eliminare questa voce?')) return;
+  menuItems.splice(index, 1);
+  renderMenuItems();
+}
+
+// ============================================================
+// SAVE
+// ============================================================
+async function saveAll() {
+  const config = {
+    eventDate: document.getElementById('cfg-eventDate').value,
+    bookingDeadline: document.getElementById('cfg-bookingDeadline').value,
+    maxSeats: parseInt(document.getElementById('cfg-maxSeats').value) || 320,
+    bookingOpen: document.getElementById('cfg-bookingOpen').checked,
+    paypalClientId: document.getElementById('cfg-paypalClientId').value.trim(),
+    satispayLink: document.getElementById('cfg-satispayLink').value.trim(),
+    emailjsServiceId: document.getElementById('cfg-emailjsServiceId').value.trim(),
+    emailjsTemplateId: document.getElementById('cfg-emailjsTemplateId').value.trim(),
+    emailjsPublicKey: document.getElementById('cfg-emailjsPublicKey').value.trim(),
+    adminEmail: document.getElementById('cfg-adminEmail').value.trim(),
+    menuItems: menuItems.filter(i => i.name.trim())
+  };
+
+  const res = await fetch('/api/save-config', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(config)
+  });
+
+  if (res.ok) {
+    const toast = document.getElementById('save-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  } else {
+    alert('Errore nel salvataggio. Riprova.');
+  }
+}
+
+// ============================================================
+// AUTO-LOGIN
+// ============================================================
+const saved = sessionStorage.getItem('adminToken');
+if (saved) {
+  adminToken = saved;
+  document.getElementById('login-overlay').style.display = 'none';
+  loadConfig();
+}
+</script>
+</body>
+</html>
