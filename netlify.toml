@@ -11,3 +11,8 @@
   for = "/admin/*"
   [headers.values]
     X-Frame-Options = "DENY"
+
+[[headers]]
+  for = "/.well-known/*"
+  [headers.values]
+    Content-Type = "text/plain"
