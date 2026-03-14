@@ -1,4 +1,4 @@
-const { getStore } = require('@netlify/blobs');
+const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
 function verifyToken(event) {
   const auth = event.headers['authorization'] || '';
@@ -12,26 +12,36 @@ function verifyToken(event) {
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type,Authorization' } };
+    return { statusCode: 204, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type,Authorization' } };
   }
   if (!verifyToken(event)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+    return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
   try {
     const { id, status } = JSON.parse(event.body);
-    const store = getStore('pranzo-bookings');
-    const raw = await store.get(id);
-    if (!raw) return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };
-    const booking = JSON.parse(raw);
-    booking.status = status;
-    booking.updatedAt = new Date().toISOString();
-    await store.set(id, JSON.stringify(booking));
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ ok: true })
-    };
+    const apiKey = process.env.JSONBIN_API_KEY;
+    const binId = process.env.JSONBIN_BOOKINGS_BIN_ID;
+
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: { 'X-Master-Key': apiKey }
+    });
+    const data = await res.json();
+    const bookings = data.record?.bookings || [];
+
+    const idx = bookings.findIndex(b => b.id === id);
+    if (idx === -1) return { statusCode: 404, headers: CORS, body: JSON.stringify({ error: 'Not found' }) };
+
+    bookings[idx].status = status;
+    bookings[idx].updatedAt = new Date().toISOString();
+
+    await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': apiKey },
+      body: JSON.stringify({ bookings })
+    });
+
+    return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true }) };
   } catch(e) {
-    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
   }
 };

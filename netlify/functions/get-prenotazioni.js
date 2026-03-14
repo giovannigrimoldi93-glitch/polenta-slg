@@ -1,7 +1,4 @@
-// ============================================================
-// get-prenotazioni.js
-// ============================================================
-const { getStore } = require('@netlify/blobs');
+const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
 function verifyToken(event) {
   const auth = event.headers['authorization'] || '';
@@ -14,26 +11,25 @@ function verifyToken(event) {
 }
 
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type,Authorization' } };
+  }
   if (!verifyToken(event)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+    return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
   try {
-    const store = getStore('pranzo-bookings');
-    const keys = await store.list();
-    const bookings = [];
-    for (const key of (keys.blobs || [])) {
-      try {
-        const raw = await store.get(key.key);
-        bookings.push(JSON.parse(raw));
-      } catch(e) {}
-    }
-    bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify(bookings)
-    };
+    const apiKey = process.env.JSONBIN_API_KEY;
+    const binId = process.env.JSONBIN_BOOKINGS_BIN_ID;
+
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: { 'X-Master-Key': apiKey }
+    });
+    const data = await res.json();
+    const bookings = (data.record?.bookings || [])
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return { statusCode: 200, headers: CORS, body: JSON.stringify(bookings) };
   } catch(e) {
-    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
   }
 };

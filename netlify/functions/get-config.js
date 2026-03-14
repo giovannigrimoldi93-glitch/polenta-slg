@@ -1,15 +1,24 @@
-const { getStore } = require('@netlify/blobs');
+const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+
+async function jsonbinGet(binId, apiKey) {
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+    headers: { 'X-Master-Key': apiKey }
+  });
+  const data = await res.json();
+  return data.record || {};
+}
 
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type,Authorization' } };
+  }
   try {
-    const store = getStore('pranzo-config');
-    let config = {};
-    try {
-      const raw = await store.get('config');
-      if (raw) config = JSON.parse(raw);
-    } catch(e) { /* first run, no config yet */ }
+    const apiKey = process.env.JSONBIN_API_KEY;
+    const configBinId = process.env.JSONBIN_CONFIG_BIN_ID;
+    const bookingsBinId = process.env.JSONBIN_BOOKINGS_BIN_ID;
 
-    // Default values
+    const config = await jsonbinGet(configBinId, apiKey);
+
     const result = {
       eventDate: config.eventDate || '2026-03-15',
       bookingDeadline: config.bookingDeadline || '2026-03-13',
@@ -28,29 +37,17 @@ exports.handler = async (event) => {
       ]
     };
 
-    // Count booked seats from bookings store
+    // Count booked seats
     try {
-      const bookingsStore = getStore('pranzo-bookings');
-      const keys = await bookingsStore.list();
-      let booked = 0;
-      for (const key of (keys.blobs || [])) {
-        try {
-          const raw = await bookingsStore.get(key.key);
-          const b = JSON.parse(raw);
-          if (b.status !== 'cancelled') {
-            booked += (b.items || []).reduce((a, i) => a + (i.qty || 1), 0);
-          }
-        } catch(e) {}
-      }
-      result.bookedSeats = booked;
-    } catch(e) {}
+      const bookingsData = await jsonbinGet(bookingsBinId, apiKey);
+      const bookings = bookingsData.bookings || [];
+      result.bookedSeats = bookings
+        .filter(b => b.status !== 'cancelled')
+        .reduce((a, b) => a + (b.items || []).reduce((s, i) => s + (i.qty || 1), 0), 0);
+    } catch(e) { result.bookedSeats = 0; }
 
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify(result)
-    };
+    return { statusCode: 200, headers: CORS, body: JSON.stringify(result) };
   } catch(e) {
-    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: e.message }) };
   }
 };
