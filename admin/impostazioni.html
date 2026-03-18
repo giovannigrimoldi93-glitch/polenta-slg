@@ -180,13 +180,9 @@
       <label>PayPal Client ID</label>
       <input type="text" id="cfg-paypalClientId" placeholder="AaBbCc... (dal tuo account PayPal Developer)" />
     </div>
-    <div class="form-group">
-      <label>Link Satispay (con importo variabile)</label>
-      <input type="url" id="cfg-satispayLink" placeholder="https://pos.satispay.com/..." />
-    </div>
     <div class="alert alert-info" style="margin-top:0.5rem">
       <span>ℹ️</span>
-      <span>Per disabilitare un metodo di pagamento, lascia il campo vuoto.</span>
+      <span>Per disabilitare PayPal, lascia il campo vuoto. Satispay si configura dalla pagina <a href="satispay-setup.html">Setup Satispay</a>.</span>
     </div>
   </div>
 
@@ -240,7 +236,6 @@ async function loadConfig() {
   document.getElementById('cfg-bookingOpen').checked = cfg.bookingOpen !== false;
   document.getElementById('cfg-closedMessage').value = cfg.closedMessage || '';
   document.getElementById('cfg-paypalClientId').value = cfg.paypalClientId || '';
-  document.getElementById('cfg-satispayLink').value = cfg.satispayLink || '';
   renderMenuItems();
 }
 
@@ -306,7 +301,6 @@ async function saveAll() {
     bookingOpen: document.getElementById('cfg-bookingOpen').checked,
     closedMessage: document.getElementById('cfg-closedMessage').value.trim(),
     paypalClientId: document.getElementById('cfg-paypalClientId').value.trim(),
-    satispayLink: document.getElementById('cfg-satispayLink').value.trim(),
     menuItems: menuItems.filter(i => i.name.trim())
   };
 

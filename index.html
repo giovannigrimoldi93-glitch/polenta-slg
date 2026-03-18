@@ -154,7 +154,7 @@ async function init() {
     } else {
       document.getElementById('opt-paypal').classList.add('hidden');
     }
-    if (!data.satispayLink) document.getElementById('opt-satispay').classList.add('hidden');
+    if (!data.satispayEnabled) document.getElementById('opt-satispay').classList.add('hidden');
 
     document.querySelectorAll('input[name=payment]').forEach(el => el.addEventListener('change', onPaymentChange));
 
