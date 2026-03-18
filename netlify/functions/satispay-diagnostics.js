@@ -19,10 +19,13 @@ async function jsonbinGet(binId, apiKey) {
 }
 
 exports.handler = async (event) => {
+  console.log('diagnostics called, method:', event.httpMethod, 'has auth:', !!event.headers['authorization']);
   if (!verifyToken(event)) {
+    console.log('token verification failed');
     return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
   try {
+    console.log('token ok, checking jsonbin...');
     const config = await jsonbinGet(
       process.env.JSONBIN_CONFIG_BIN_ID,
       process.env.JSONBIN_API_KEY
