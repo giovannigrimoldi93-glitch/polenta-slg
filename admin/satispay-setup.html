@@ -69,41 +69,13 @@
   </div>
 
   <!-- STEP 2 -->
-  <div class="card" id="step2" style="opacity:.4;pointer-events:none">
+  <div class="card" id="step2" style="opacity:.4">
     <div class="step">
       <div class="step-num">2</div>
       <div style="flex:1">
-        <strong>Salva le variabili d'ambiente su Netlify</strong>
-        <p style="font-size:.9rem;color:var(--brown-light);margin:.5rem 0">Vai su <strong>Netlify → Project configuration → Environment variables</strong> e aggiungi queste due variabili:</p>
-        <div style="margin-top:.75rem">
-          <div class="form-group">
-            <label>SATISPAY_KEY_ID</label>
-            <div class="key-box" id="key-id-box">–</div>
-            <button class="btn btn-outline btn-sm" style="margin-top:.5rem" onclick="copyText('key-id-box')">📋 Copia</button>
-          </div>
-          <div class="form-group" style="margin-top:1rem">
-            <label>SATISPAY_PRIVATE_KEY</label>
-            <div class="key-box" id="private-key-box">–</div>
-            <button class="btn btn-outline btn-sm" style="margin-top:.5rem" onclick="copyText('private-key-box')">📋 Copia</button>
-          </div>
-        </div>
-        <div class="alert alert-error" style="margin-top:1rem">
-          <span>🔒</span>
-          <span>Salva la <strong>Private Key</strong> in un posto sicuro — non sarà più recuperabile dopo questa pagina!</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 3 -->
-  <div class="card" id="step3" style="opacity:.4">
-    <div class="step">
-      <div class="step-num">3</div>
-      <div style="flex:1">
-        <strong>Aggiungi SITE_URL e rideploya</strong>
-        <p style="font-size:.9rem;color:var(--brown-light);margin:.5rem 0">Aggiungi anche questa variabile su Netlify:</p>
-        <div class="key-box">SITE_URL = https://polentata-slg.netlify.app</div>
-        <p style="font-size:.9rem;color:var(--brown-light);margin-top:.75rem">Poi vai su <strong>Deploys → Trigger deploy</strong> per applicare le nuove variabili. Da quel momento Satispay è completamente integrato! ✅</p>
+        <strong>✅ Tutto fatto!</strong>
+        <p style="font-size:.9rem;color:var(--brown-light);margin:.5rem 0">Le chiavi sono state salvate automaticamente nel database. Satispay è ora attivo nella pagina di prenotazione — nessuna variabile d'ambiente aggiuntiva necessaria.</p>
+        <a href="/" target="_blank" class="btn btn-gold" style="margin-top:.75rem;width:auto;display:inline-flex">🌐 Verifica la pagina pubblica</a>
       </div>
     </div>
   </div>
@@ -142,11 +114,7 @@ async function runSetup() {
     }
 
     result.innerHTML = `<div class="alert alert-success"><span>✅</span><span>Chiavi generate e registrate con successo!</span></div>`;
-    document.getElementById('key-id-box').textContent = data.keyId;
-    document.getElementById('private-key-box').textContent = data.privateKey;
     document.getElementById('step2').style.opacity = '1';
-    document.getElementById('step2').style.pointerEvents = 'auto';
-    document.getElementById('step3').style.opacity = '1';
     btn.innerHTML = '✅ Completato';
   } catch(e) {
     result.innerHTML = `<div class="alert alert-error"><span>❌</span><span>Errore: ${e.message}</span></div>`;

@@ -25,7 +25,7 @@ exports.handler = async (event) => {
       maxSeats: config.maxSeats || 320,
       bookingOpen: config.bookingOpen !== false,
       paypalClientId: config.paypalClientId || '',
-      satispayEnabled: !!(process.env.SATISPAY_KEY_ID && process.env.SATISPAY_PRIVATE_KEY),
+      satispayEnabled: !!(config.satispayKeyId && config.satispayPrivateKey),
       emailjsServiceId: config.emailjsServiceId || '',
       emailjsTemplateId: config.emailjsTemplateId || '',
       emailjsPublicKey: config.emailjsPublicKey || '',
