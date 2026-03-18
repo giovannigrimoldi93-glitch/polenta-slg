@@ -148,14 +148,14 @@ async function checkExistingKeys() {
     const res = await fetch('/api/satispay-diagnostics', { headers: authHeaders() });
     const data = await res.json();
     if (data.ok) {
-      // Chiavi già presenti e funzionanti
       document.getElementById('setup-btn').innerHTML = '✅ Chiavi già configurate';
       document.getElementById('setup-btn').disabled = true;
-      document.getElementById('setup-result').innerHTML = `<div class="alert alert-success"><span>✅</span><span>Satispay è già configurato e funzionante. Negozio collegato: <strong>${data.shop?.name || data.shop?.id || 'OK'}</strong></span></div>`;
+      document.getElementById('setup-result').innerHTML = `<div class="alert alert-success"><span>✅</span><span>Satispay configurato. Key ID: <code>${data.keyId}</code></span></div>`;
       document.getElementById('step2').style.opacity = '1';
     }
+    // se ok:false le chiavi non ci sono, mostra il form normalmente
   } catch(e) {
-    // Chiavi non presenti, mostra il form normalmente
+    // errore di rete, mostra il form normalmente
   }
 }
 </script>

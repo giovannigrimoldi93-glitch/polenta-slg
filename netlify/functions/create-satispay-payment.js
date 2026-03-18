@@ -19,7 +19,7 @@ exports.handler = async (event) => {
 
     const baseUrl = process.env.SITE_URL || 'https://polentata-slg.netlify.app';
     const redirectUrl = `${baseUrl}/grazie.html?id=${bookingId}&nome=${encodeURIComponent(nome || '')}&metodo=satispay`;
-    const callbackUrl = `${baseUrl}/api/satispay-callback`;
+    const callbackUrl = `${baseUrl}/api/satispay-callback?booking_id=${bookingId}`;
 
     const payment = await satispayRequest('POST', '/g_business/v1/payments', {
       flow: 'MATCH_CODE',

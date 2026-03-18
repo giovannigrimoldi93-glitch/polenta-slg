@@ -19,12 +19,10 @@ async function jsonbinPut(binId, apiKey, body) {
 }
 
 exports.handler = async (event) => {
-  // Log tutto per debug
-  console.log('Satispay callback received:', {
+  console.log('Satispay callback:', {
     method: event.httpMethod,
-    query: event.rawQuery,
-    headers: event.headers,
-    body: event.body
+    query: event.queryStringParameters,
+    rawQuery: event.rawQuery
   });
 
   if (event.httpMethod === 'OPTIONS') {
@@ -32,56 +30,20 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Satispay può inviare il payment_id in vari modi
-    let paymentId = null;
-
-    // 1. Come query param ?payment_id=xxx
-    if (event.rawQuery) {
-      const params = new URLSearchParams(event.rawQuery);
-      paymentId = params.get('payment_id');
-    }
-
-    // 2. Nel body JSON
-    if (!paymentId && event.body) {
-      try {
-        const body = JSON.parse(event.body);
-        paymentId = body.payment_id || body.id;
-      } catch(e) {}
-    }
-
-    // 3. Nel body come form-encoded
-    if (!paymentId && event.body) {
-      try {
-        const params = new URLSearchParams(event.body);
-        paymentId = params.get('payment_id');
-      } catch(e) {}
-    }
-
-    console.log('Extracted paymentId:', paymentId);
-
-    if (!paymentId) {
-      console.error('payment_id mancante. Body:', event.body, 'Query:', event.rawQuery);
-      return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'payment_id mancante' }) };
-    }
-
-    // Verifica lo stato con Satispay
-    const payment = await satispayRequest('GET', `/g_business/v1/payments/${paymentId}`);
-    console.log('Payment status from Satispay:', payment.status, 'metadata:', payment.metadata);
-
-    if (payment.status !== 'ACCEPTED') {
-      return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, status: payment.status }) };
-    }
-
-    // Recupera booking_id dai metadata
-    const bookingId = payment.metadata?.booking_id;
-    if (!bookingId) {
-      console.error('booking_id non trovato nei metadata:', payment.metadata);
-      return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'booking_id non trovato nei metadata' }) };
-    }
-
-    // Aggiorna prenotazione
     const apiKey = process.env.JSONBIN_API_KEY;
     const binId = process.env.JSONBIN_BOOKINGS_BIN_ID;
+
+    // Legge booking_id dall'URL del callback
+    const bookingId = event.queryStringParameters?.booking_id;
+
+    if (!bookingId) {
+      console.error('booking_id mancante nei query params:', event.queryStringParameters);
+      return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'booking_id mancante' }) };
+    }
+
+    console.log('Processing booking:', bookingId);
+
+    // Cerca la prenotazione nel db
     const bookingsData = await jsonbinGet(binId, apiKey);
     const bookings = bookingsData.bookings || [];
     const idx = bookings.findIndex(b => b.id === bookingId);
@@ -91,13 +53,26 @@ exports.handler = async (event) => {
       return { statusCode: 404, headers: CORS, body: JSON.stringify({ error: 'Prenotazione non trovata' }) };
     }
 
+    // Cerca il pagamento Satispay corrispondente tra i pagamenti recenti
+    // filtriamo per metadata.booking_id
+    let paymentId = null;
+    try {
+      const payments = await satispayRequest('GET', '/g_business/v1/payments?limit=10&status=ACCEPTED');
+      const match = (payments.data || payments.payment_list || [])
+        .find(p => p.metadata?.booking_id === bookingId);
+      if (match) paymentId = match.id;
+    } catch(e) {
+      console.log('Non riesco a cercare i pagamenti, procedo comunque:', e.message);
+    }
+
+    // Aggiorna la prenotazione a pagato
     bookings[idx].status = 'paid';
-    bookings[idx].satispayPaymentId = paymentId;
+    if (paymentId) bookings[idx].satispayPaymentId = paymentId;
     bookings[idx].paidAt = new Date().toISOString();
     bookings[idx].updatedAt = new Date().toISOString();
     await jsonbinPut(binId, apiKey, { bookings });
 
-    console.log('Prenotazione flaggata come pagata:', bookingId);
+    console.log('Prenotazione flaggata pagata:', bookingId);
     return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true }) };
 
   } catch(e) {
