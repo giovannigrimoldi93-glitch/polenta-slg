@@ -68,6 +68,14 @@
     </div>
   </div>
 
+  <!-- DIAGNOSTICA -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="card-title"><span class="icon">🔍</span> Diagnostica</div>
+    <p style="font-size:.9rem;color:var(--brown-light);margin-bottom:.75rem">Verifica che le credenziali siano corrette e mostra le info del negozio Satispay collegato.</p>
+    <button class="btn btn-outline" style="width:auto" onclick="runDiagnostics()">🔍 Verifica credenziali</button>
+    <div id="diagnostics-result" style="margin-top:1rem"></div>
+  </div>
+
   <!-- STEP 2 -->
   <div class="card" id="step2" style="opacity:.4">
     <div class="step">
@@ -129,7 +137,27 @@ function copyText(id) {
 }
 
 const saved = sessionStorage.getItem('adminToken');
-if (saved) { adminToken = saved; document.getElementById('login-overlay').style.display = 'none'; }
+if (saved) {
+  adminToken = saved;
+  document.getElementById('login-overlay').style.display = 'none';
+  checkExistingKeys();
+}
+
+async function checkExistingKeys() {
+  try {
+    const res = await fetch('/api/satispay-diagnostics', { headers: authHeaders() });
+    const data = await res.json();
+    if (data.ok) {
+      // Chiavi già presenti e funzionanti
+      document.getElementById('setup-btn').innerHTML = '✅ Chiavi già configurate';
+      document.getElementById('setup-btn').disabled = true;
+      document.getElementById('setup-result').innerHTML = `<div class="alert alert-success"><span>✅</span><span>Satispay è già configurato e funzionante. Negozio collegato: <strong>${data.shop?.name || data.shop?.id || 'OK'}</strong></span></div>`;
+      document.getElementById('step2').style.opacity = '1';
+    }
+  } catch(e) {
+    // Chiavi non presenti, mostra il form normalmente
+  }
+}
 </script>
 </body>
 </html>
