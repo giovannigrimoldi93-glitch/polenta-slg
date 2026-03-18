@@ -50,7 +50,7 @@ exports.handler = async (event) => {
       .reduce((a, b) => a + (b.items || []).reduce((s, i) => s + (i.qty || 1), 0), 0);
     const newPax = (booking.items || []).reduce((a, i) => a + (i.qty || 1), 0);
 
-    if (booked + newPax > maxSeats) {
+    if (booked + newPax > maxSeats && booking.status !== "waitlist") {
       return { statusCode: 409, headers: CORS, body: JSON.stringify({ message: 'Spiacenti, posti esauriti.' }) };
     }
 
