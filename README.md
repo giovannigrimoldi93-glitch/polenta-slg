@@ -8,20 +8,29 @@ Sistema web per gestire le prenotazioni del pranzo parrocchiale con pagamento on
 
 ```
 pranzo-parrocchia/
-├── index.html                    ← Pagina pubblica di prenotazione
-├── grazie.html                   ← Conferma dopo prenotazione
+├── index.html                        ← Pagina pubblica di prenotazione
+├── grazie.html                       ← Conferma dopo prenotazione
+├── carta_intestata.jpeg              ← Logo/intestazione per ricevute
+├── .well-known/
+│   └── apple-developer-merchantid-domain-association  ← Verifica Apple Pay
 ├── admin/
-│   ├── index.html                ← Dashboard prenotazioni (protetta)
-│   └── impostazioni.html         ← Gestione menù, prezzi, posti (protetta)
-├── css/style.css                 ← Stili condivisi
-├── netlify/functions/            ← Backend serverless
-│   ├── admin-login.js
-│   ├── get-config.js
-│   ├── save-config.js
-│   ├── prenota.js
-│   ├── get-prenotazioni.js
-│   └── update-booking.js
-├── netlify.toml                  ← Configurazione Netlify
+│   ├── index.html                    ← Dashboard prenotazioni (protetta)
+│   ├── impostazioni.html             ← Gestione menù, prezzi, posti (protetta)
+│   └── satispay-setup.html          ← Setup chiavi API Satispay (una tantum)
+├── css/style.css                     ← Stili condivisi
+├── netlify/functions/                ← Backend serverless
+│   ├── admin-login.js                ← Autenticazione admin
+│   ├── get-config.js                 ← Legge configurazione evento
+│   ├── save-config.js                ← Salva configurazione evento
+│   ├── prenota.js                    ← Crea prenotazione
+│   ├── get-prenotazioni.js           ← Lista prenotazioni (admin)
+│   ├── update-booking.js             ← Aggiorna prenotazione
+│   ├── delete-booking.js             ← Elimina prenotazione
+│   ├── satispay-setup.js             ← Genera e registra chiavi RSA Satispay
+│   ├── satispay-auth-helper.js       ← Firma richieste Satispay (modulo condiviso)
+│   ├── create-satispay-payment.js    ← Crea transazione Satispay
+│   └── satispay-callback.js          ← Webhook pagamento Satispay completato
+├── netlify.toml                      ← Configurazione Netlify
 └── package.json
 ```
 
@@ -44,65 +53,35 @@ git push -u origin main
 
 1. Vai su [netlify.com](https://netlify.com) e accedi
 2. Click **"Add new site" → "Import an existing project"**
-3. Collega GitHub e seleziona il repository `pranzo-parrocchia`
-4. Impostazioni build:
-   - **Base directory**: (vuoto)
-   - **Build command**: (vuoto)
-   - **Publish directory**: `.`
+3. Collega GitHub e seleziona il repository
+4. Impostazioni build: lascia tutto vuoto tranne **Publish directory** → `.`
 5. Click **"Deploy site"**
 
-### 3. Imposta la variabile d'ambiente (password admin)
+### 3. Variabili d'ambiente obbligatorie
 
-1. Nel pannello Netlify → **Site configuration → Environment variables**
-2. Click **"Add a variable"**
-3. Key: `ADMIN_PASSWORD`
-4. Value: `PolentataSLG`
-5. Salva e fai un nuovo deploy (**Deploys → Trigger deploy**)
+Vai su **Project configuration → Environment variables** e aggiungi:
 
-### 4. Abilita Netlify Blobs
+| Variabile | Valore | Note |
+|---|---|---|
+| `ADMIN_PASSWORD` | `PolentataSLG` | Password accesso admin |
+| `JSONBIN_API_KEY` | `...` | Master Key da jsonbin.io |
+| `JSONBIN_CONFIG_BIN_ID` | `...` | Bin ID del bin `pranzo-config` |
+| `JSONBIN_BOOKINGS_BIN_ID` | `...` | Bin ID del bin `pranzo-bookings` |
+| `SITE_URL` | `https://polentata-slg.netlify.app` | URL del sito (per Satispay) |
 
-Netlify Blobs si attiva automaticamente quando il sito è live. Non serve configurazione aggiuntiva.
+Dopo averle aggiunte: **Deploys → Trigger deploy**.
 
 ---
 
 ## ⚙️ Configurazione iniziale
 
-Vai su `https://TUO-SITO.netlify.app/admin/impostazioni.html` e inserisci:
+Vai su `/admin/impostazioni.html` e inserisci:
 
-- **Data del pranzo**: 15/03/2026
-- **Scadenza prenotazioni**: 13/03/2026
-- **Posti massimi**: 320
-- **Voci di menù**: già precaricate (Polenta adulto €12, bambino €10, dolce €2)
-- **PayPal Client ID**: dal tuo account [PayPal Developer](https://developer.paypal.com)
-- **Link Satispay**: dal pannello Satispay Business
-- **EmailJS**: vedi sezione sotto
-
----
-
-## 📧 Configurare EmailJS (email di conferma gratuite)
-
-1. Crea account su [emailjs.com](https://emailjs.com) (piano gratuito: 200 email/mese)
-2. **Add New Service** → Gmail o altro provider
-3. **Email Templates** → Create New Template con queste variabili:
-   ```
-   A: {{to_email}}
-   Oggetto: Prenotazione confermata – Pranzo in Parrocchia
-   
-   Ciao {{nome}} {{cognome}},
-   la tua prenotazione #{{booking_id}} è stata ricevuta.
-   
-   Ordine:
-   {{items}}
-   
-   Totale: {{totale}}
-   Pagamento: {{metodo}}
-   Stato: {{stato}}
-   Note: {{note}}
-   
-   Grazie e a presto!
-   Parrocchia San Luigi Gonzaga – Milano
-   ```
-4. Copia **Service ID**, **Template ID** e **Public Key** nelle impostazioni della webapp
+- **Data del pranzo** e **scadenza prenotazioni**
+- **Posti massimi** (es. 320)
+- **Messaggio prenotazioni chiuse** (personalizzabile)
+- **Voci di menù** con prezzi (già precaricate: Polenta adulto €12, bambino €10, dolce €2)
+- **PayPal Client ID** (vedi sezione sotto)
 
 ---
 
@@ -110,58 +89,97 @@ Vai su `https://TUO-SITO.netlify.app/admin/impostazioni.html` e inserisci:
 
 1. Vai su [developer.paypal.com](https://developer.paypal.com)
 2. Accedi con il tuo account PayPal Business
-3. **Apps & Credentials** → Create App
-4. Copia il **Client ID** (usa quello Live, non Sandbox, per la produzione)
+3. **Apps & Credentials** → assicurati di essere su **Live** (non Sandbox)
+4. Apri la tua app → copia il **Client ID Live**
 5. Incollalo nelle impostazioni della webapp
+
+> **Apple Pay / Google Pay**: sono già attivi se abilitati nel pannello PayPal Developer → Features. Apple Pay richiede la verifica del dominio (file `.well-known` già incluso nel progetto).
 
 ---
 
-## 📱 Configurare Satispay
+## 📱 Configurare Satispay API (Web-redirect)
 
-1. Dal pannello Satispay Business → genera un link di pagamento
-2. Il link deve supportare importo variabile (o imposta un link generico)
-3. Incollalo nelle impostazioni della webapp
+Il sistema usa l'integrazione API completa: crea transazioni al volo, reindirizza l'utente alla pagina Satispay e aggiorna automaticamente lo stato a "pagato" tramite webhook.
+
+### Setup (una sola volta)
+
+1. Dal pannello **Satispay Business → negozio e-commerce** → genera un **codice di attivazione**
+2. Su Netlify aggiungi la variabile: `SATISPAY_ACTIVATION_CODE` = il codice
+3. Fai un deploy
+4. Vai su `/admin/satispay-setup.html`
+5. Clicca **"Genera e registra chiavi"**
+6. Copia i valori ottenuti e aggiungili come variabili d'ambiente:
+   - `SATISPAY_KEY_ID` = il keyId restituito
+   - `SATISPAY_PRIVATE_KEY` = la private key restituita
+7. Fai un nuovo deploy
+
+> ⚠️ La **Private Key** viene mostrata una sola volta — salvala in un posto sicuro!
 
 ---
 
 ## 🔐 Accesso admin
 
-- **Dashboard prenotazioni**: `/admin/`
-- **Impostazioni**: `/admin/impostazioni.html`
-- **Password**: quella impostata in `ADMIN_PASSWORD` su Netlify
+| Pagina | URL |
+|---|---|
+| Dashboard prenotazioni | `/admin/` |
+| Impostazioni evento | `/admin/impostazioni.html` |
+| Setup Satispay | `/admin/satispay-setup.html` |
+
+Password: quella impostata in `ADMIN_PASSWORD` su Netlify.
 
 ---
 
 ## 📊 Funzionalità
 
 ### Pagina pubblica (`/`)
-- Menù dinamico caricato dalle impostazioni
-- Selezione quantità per ogni voce
-- Totale in tempo reale
-- Pagamento con PayPal (integrato), Satispay (redirect) o in segreteria
+- Menù dinamico con selezione quantità e totale in tempo reale
+- Countdown alla chiusura prenotazioni
 - Barra disponibilità posti in tempo reale
-- Email di conferma automatica
+- Lista d'attesa automatica a posti esauriti
+- Pagamento con **PayPal** (integrato, con Apple Pay/Google Pay/MyBank/carte), **Satispay** (API completa) o **in segreteria**
+- Messaggio personalizzabile quando le prenotazioni sono chiuse
 
 ### Dashboard admin (`/admin/`)
-- Lista prenotazioni con filtri per stato
-- Statistiche: totale prenotazioni, persone, incasso, posti rimasti
-- Cambio stato (segna come pagato, annulla)
-- Export CSV per la lista del pranzo
+- Lista prenotazioni con filtri (pagati, segreteria, Satispay, lista attesa, annullati)
+- Statistiche: prenotazioni, persone, incasso confermato, posti rimasti, in attesa, lista attesa
+- **✏️ Modifica** prenotazione completa (dati, ordine, stato, metodo, nota interna)
+- **✅ Segna come pagato** con un click
+- **🖨️ Ricevuta** stampabile con carta intestata parrocchiale
+- **👨‍🍳 Riepilogo cucina** con contatori per voce di menù
+- **📱 QR Code** della pagina pubblica (scaricabile e stampabile)
+- **⬇️ Export XLSX** con due fogli: prenotazioni complete + riepilogo cucina
+- **🗑️ Elimina** singola prenotazione o tutte
 
 ### Impostazioni (`/admin/impostazioni.html`)
-- Gestione voci di menù (aggiungi, modifica, elimina)
-- Apertura/chiusura prenotazioni
-- Configurazione pagamenti e email
-- Posti massimi e date
+- Gestione voci di menù (aggiungi, modifica, elimina, prezzi)
+- Apertura/chiusura prenotazioni con toggle
+- Data evento e scadenza prenotazioni
+- Posti massimi
+- Messaggio personalizzabile prenotazioni chiuse
+- Configurazione PayPal Client ID e link Satispay (fallback)
+
+---
+
+## 🗄️ Database (JSONBin.io)
+
+Il sistema usa [JSONBin.io](https://jsonbin.io) come database (piano gratuito).
+
+Crea due bin su jsonbin.io:
+- `pranzo-config` con contenuto iniziale `{"init": true}`
+- `pranzo-bookings` con contenuto iniziale `{"bookings": []}`
+
+Copia i **Bin ID** e la **Master Key** nelle variabili d'ambiente Netlify.
 
 ---
 
 ## 🆘 Problemi comuni
 
-**Le funzioni non rispondono**: verifica che il deploy sia andato a buon fine e che la variabile `ADMIN_PASSWORD` sia impostata.
+**Le funzioni restituiscono 401**: verifica che `ADMIN_PASSWORD` sia impostata e fai un nuovo deploy.
 
-**Il database è vuoto**: Netlify Blobs si inizializza al primo utilizzo. Salva le impostazioni una volta per creare il database.
+**Errore 500 su get-config o save-config**: verifica che `JSONBIN_API_KEY`, `JSONBIN_CONFIG_BIN_ID` e `JSONBIN_BOOKINGS_BIN_ID` siano corretti.
 
-**PayPal non appare**: inserisci un Client ID valido nelle impostazioni.
+**PayPal non appare**: assicurati di usare il Client ID **Live** (non Sandbox).
 
-**Email non inviate**: verifica le credenziali EmailJS. Il piano gratuito ha un limite di 200 email/mese.
+**Satispay dà errore**: verifica che `SATISPAY_KEY_ID` e `SATISPAY_PRIVATE_KEY` siano impostati. Se non hai ancora fatto il setup, vai su `/admin/satispay-setup.html`.
+
+**Apple Pay non compare**: verifica che il dominio sia registrato su PayPal Business → Metodi di pagamento → Apple Pay, e che il file `.well-known/apple-developer-merchantid-domain-association` sia accessibile via browser.

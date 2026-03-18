@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setup Satispay – Admin</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .admin-nav{background:var(--brown-dark);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .admin-nav .brand{color:var(--cream);font-family:var(--font-display);font-size:1.1rem}
+    .admin-nav .nav-links{display:flex;gap:.5rem}
+    .admin-nav a{color:rgba(249,244,236,.75);text-decoration:none;font-size:.87rem;padding:.35rem .8rem;border-radius:6px;transition:all .15s}
+    .admin-nav a:hover{background:rgba(255,255,255,.12);color:var(--cream)}
+    .step{counter-increment:step;display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.5rem}
+    .step-num{background:var(--brown-dark);color:var(--cream);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;margin-top:.1rem}
+    .key-box{background:#1a1a2e;color:#00ff88;font-family:monospace;font-size:.78rem;padding:1rem;border-radius:8px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin-top:.75rem;max-height:120px;overflow-y:auto}
+    .login-overlay{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:999}
+    .login-box{background:var(--warm-white);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center;box-shadow:0 8px 32px var(--shadow-deep)}
+    .login-box h2{margin-bottom:.5rem}.login-box p{color:var(--brown-light);font-size:.9rem;margin-bottom:1.5rem}
+    #login-error{color:var(--red-soft);font-size:.85rem;margin-top:.5rem;min-height:1.2em}
+  </style>
+</head>
+<body>
+
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div style="font-size:2.5rem;margin-bottom:.5rem">🔐</div>
+    <h2>Area Admin</h2>
+    <p>Inserisci la password per accedere</p>
+    <div class="form-group"><input type="password" id="pwd-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+    <button class="btn btn-primary" onclick="doLogin()">Accedi</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<nav class="admin-nav">
+  <div class="brand">🍲 Pranzo in Parrocchia · Admin</div>
+  <div class="nav-links">
+    <a href="index.html">📋 Prenotazioni</a>
+    <a href="impostazioni.html">⚙️ Impostazioni</a>
+    <a href="satispay-setup.html">📱 Satispay Setup</a>
+    <a href="/" target="_blank">🌐 Sito pubblico</a>
+    <a href="#" onclick="logout()">Esci</a>
+  </div>
+</nav>
+
+<div class="container" style="max-width:700px">
+  <h1 style="font-size:1.6rem;margin-bottom:.5rem">📱 Setup Satispay API</h1>
+  <p style="color:var(--brown-light);margin-bottom:2rem">Da eseguire <strong>una sola volta</strong> per attivare l'integrazione Satispay completa.</p>
+
+  <div class="alert alert-warning" style="margin-bottom:1.5rem">
+    <span>⚠️</span>
+    <span>Prima di procedere assicurati di aver impostato <code>SATISPAY_ACTIVATION_CODE</code> nelle variabili d'ambiente su Netlify.</span>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="card">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div style="flex:1">
+        <strong>Genera le chiavi e registra su Satispay</strong>
+        <p style="font-size:.9rem;color:var(--brown-light);margin:.5rem 0">Questo pulsante genera una coppia di chiavi RSA, registra la chiave pubblica su Satispay usando il tuo codice di attivazione e restituisce il <code>keyId</code> e la <code>privateKey</code>.</p>
+        <button class="btn btn-primary" style="width:auto;margin-top:.75rem" id="setup-btn" onclick="runSetup()">
+          🔑 Genera e registra chiavi
+        </button>
+        <div id="setup-result" style="margin-top:1rem"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card" id="step2" style="opacity:.4;pointer-events:none">
+    <div class="step">
+      <div class="step-num">2</div>
+      <div style="flex:1">
+        <strong>Salva le variabili d'ambiente su Netlify</strong>
+        <p style="font-size:.9rem;color:var(--brown-light);margin:.5rem 0">Vai su <strong>Netlify → Project configuration → Environment variables</strong> e aggiungi queste due variabili:</p>
+        <div style="margin-top:.75rem">
+          <div class="form-group">
+            <label>SATISPAY_KEY_ID</label>
+            <div class="key-box" id="key-id-box">–</div>
+            <button class="btn btn-outline btn-sm" style="margin-top:.5rem" onclick="copyText('key-id-box')">📋 Copia</button>
+          </div>
+          <div class="form-group" style="margin-top:1rem">
+            <label>SATISPAY_PRIVATE_KEY</label>
+            <div class="key-box" id="private-key-box">–</div>
+            <button class="btn btn-outline btn-sm" style="margin-top:.5rem" onclick="copyText('private-key-box')">📋 Copia</button>
+          </div>
+        </div>
+        <div class="alert alert-error" style="margin-top:1rem">
+          <span>🔒</span>
+          <span>Salva la <strong>Private Key</strong> in un posto sicuro — non sarà più recuperabile dopo questa pagina!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card" id="step3" style="opacity:.4">
+    <div class="step">
+      <div class="step-num">3</div>
+      <div style="flex:1">
+        <strong>Aggiungi SITE_URL e rideploya</strong>
+        <p style="font-size:.9rem;color:var(--brown-light);margin:.5rem 0">Aggiungi anche questa variabile su Netlify:</p>
+        <div class="key-box">SITE_URL = https://polentata-slg.netlify.app</div>
+        <p style="font-size:.9rem;color:var(--brown-light);margin-top:.75rem">Poi vai su <strong>Deploys → Trigger deploy</strong> per applicare le nuove variabili. Da quel momento Satispay è completamente integrato! ✅</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let adminToken = '';
+
+function doLogin() {
+  fetch('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('pwd-input').value})})
+    .then(r=>r.json()).then(d=>{
+      if(d.token){adminToken=d.token;sessionStorage.setItem('adminToken',adminToken);document.getElementById('login-overlay').style.display='none';}
+      else document.getElementById('login-error').textContent='Password errata.';
+    });
+}
+function logout(){sessionStorage.removeItem('adminToken');location.reload();}
+function authHeaders(){return{'Content-Type':'application/json','Authorization':'Bearer '+adminToken};}
+
+async function runSetup() {
+  const btn = document.getElementById('setup-btn');
+  const result = document.getElementById('setup-result');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span> Generazione in corso...';
+  result.innerHTML = '';
+
+  try {
+    const res = await fetch('/api/satispay-setup', { method:'POST', headers: authHeaders(), body: JSON.stringify({}) });
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      result.innerHTML = `<div class="alert alert-error"><span>❌</span><span>${data.error}</span></div>`;
+      btn.disabled = false;
+      btn.innerHTML = '🔑 Genera e registra chiavi';
+      return;
+    }
+
+    result.innerHTML = `<div class="alert alert-success"><span>✅</span><span>Chiavi generate e registrate con successo!</span></div>`;
+    document.getElementById('key-id-box').textContent = data.keyId;
+    document.getElementById('private-key-box').textContent = data.privateKey;
+    document.getElementById('step2').style.opacity = '1';
+    document.getElementById('step2').style.pointerEvents = 'auto';
+    document.getElementById('step3').style.opacity = '1';
+    btn.innerHTML = '✅ Completato';
+  } catch(e) {
+    result.innerHTML = `<div class="alert alert-error"><span>❌</span><span>Errore: ${e.message}</span></div>`;
+    btn.disabled = false;
+    btn.innerHTML = '🔑 Genera e registra chiavi';
+  }
+}
+
+function copyText(id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => alert('Copiato!'));
+}
+
+const saved = sessionStorage.getItem('adminToken');
+if (saved) { adminToken = saved; document.getElementById('login-overlay').style.display = 'none'; }
+</script>
+</body>
+</html>

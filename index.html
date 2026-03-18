@@ -311,12 +311,16 @@ async function saveBooking(paymentMethod, transactionId) {
   if (!res.ok) { const err = await res.json(); throw new Error(err.message || 'Errore server'); }
   const result = await res.json();
 
-  // Satispay redirect
-  if (paymentMethod === 'satispay' && config.satispayLink) {
-    const importoCentesimi = Math.round(getTotal() * 100);
-    const redirectUrl = encodeURIComponent(`https://polentata-slg.netlify.app/grazie.html?id=${result.id}&nome=${encodeURIComponent(booking.nome)}&metodo=satispay`);
-    const link = config.satispayLink + (config.satispayLink.includes('?') ? '&' : '?') + `amount=${importoCentesimi}&ref=${result.id}&redirect_url=${redirectUrl}`;
-    window.location.href = link;
+  // Satispay redirect via API
+  if (paymentMethod === 'satispay') {
+    const satispayRes = await fetch('/api/create-satispay-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId: result.id, amount: getTotal(), nome: booking.nome })
+    });
+    if (!satispayRes.ok) throw new Error('Errore creazione pagamento Satispay');
+    const satispayData = await satispayRes.json();
+    window.location.href = satispayData.redirectUrl;
     return;
   }
   window.location.href = `/grazie.html?id=${result.id}&nome=${encodeURIComponent(booking.nome)}&metodo=${paymentMethod}`;
