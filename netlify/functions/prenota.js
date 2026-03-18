@@ -31,7 +31,7 @@ exports.handler = async (event) => {
     if (!booking.nome || !booking.cognome || !booking.email) {
       return { statusCode: 400, headers: CORS, body: JSON.stringify({ message: 'Dati mancanti' }) };
     }
-    if (!booking.items || !booking.items.length) {
+    if (!booking.items || (!booking.items.length && booking.status !== "waitlist")) {
       return { statusCode: 400, headers: CORS, body: JSON.stringify({ message: 'Nessuna voce selezionata' }) };
     }
 

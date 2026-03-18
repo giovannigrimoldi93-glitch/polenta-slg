@@ -5,59 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard – Pranzo in Parrocchia</title>
   <link rel="stylesheet" href="../css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    .admin-nav { background:var(--brown-dark); padding:0.75rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
-    .admin-nav .brand { color:var(--cream); font-family:var(--font-display); font-size:1.1rem; }
-    .admin-nav .nav-links { display:flex; gap:0.5rem; }
-    .admin-nav a { color:rgba(249,244,236,0.75); text-decoration:none; font-size:0.87rem; padding:0.35rem 0.8rem; border-radius:6px; transition:all 0.15s; }
-    .admin-nav a:hover, .admin-nav a.active { background:rgba(255,255,255,0.12); color:var(--cream); }
-    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1rem; margin-bottom:1.5rem; }
-    .stat-card { background:var(--warm-white); border:1px solid var(--border); border-radius:12px; padding:1.25rem 1rem; text-align:center; }
-    .stat-card .val { font-family:var(--font-display); font-size:2rem; font-weight:700; color:var(--brown-dark); }
-    .stat-card .lbl { font-size:0.78rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--brown-light); margin-top:0.2rem; }
-    .stat-card.gold .val { color:var(--gold); }
-    .stat-card.green .val { color:var(--green); }
-    .stat-card.red .val { color:var(--red-soft); }
-    .filters { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; align-items:center; }
-    .filter-btn { padding:0.35rem 0.9rem; border-radius:20px; border:1.5px solid var(--border); background:var(--cream); font-size:0.83rem; cursor:pointer; transition:all 0.15s; font-family:var(--font-body); color:var(--brown-mid); }
-    .filter-btn.active { background:var(--brown-dark); color:var(--cream); border-color:var(--brown-dark); }
-    .actions-cell { display:flex; gap:0.35rem; flex-wrap:wrap; }
-    .table-wrap { overflow-x:auto; }
-    .login-overlay { position:fixed; inset:0; background:var(--cream); display:flex; align-items:center; justify-content:center; z-index:999; }
-    .login-box { background:var(--warm-white); border:1px solid var(--border); border-radius:16px; padding:2.5rem 2rem; width:100%; max-width:360px; text-align:center; box-shadow:0 8px 32px var(--shadow-deep); }
-    .login-box h2 { margin-bottom:0.5rem; }
-    .login-box p { color:var(--brown-light); font-size:0.9rem; margin-bottom:1.5rem; }
-    #login-error { color:var(--red-soft); font-size:0.85rem; margin-top:0.5rem; min-height:1.2em; }
-    /* Modal */
-    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:500; padding:1rem; }
-    .modal-box { background:var(--warm-white); border-radius:16px; padding:2rem; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,0.2); }
-    .modal-box h2 { margin-bottom:1.25rem; font-size:1.3rem; }
-    /* Riepilogo cucina */
-    .cucina-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; }
-    .cucina-item { background:var(--cream); border:1px solid var(--border); border-radius:10px; padding:1rem; text-align:center; }
-    .cucina-item .cval { font-family:var(--font-display); font-size:2.2rem; font-weight:700; color:var(--brown-dark); }
-    .cucina-item .clbl { font-size:0.83rem; color:var(--brown-light); margin-top:0.2rem; }
-    /* Tabs */
-    .tab-bar { display:flex; gap:0; margin-bottom:1.5rem; border-bottom:2px solid var(--border); }
-    .tab-btn { padding:0.6rem 1.2rem; border:none; background:none; cursor:pointer; font-family:var(--font-body); font-size:0.9rem; color:var(--brown-light); border-bottom:3px solid transparent; margin-bottom:-2px; transition:all 0.15s; }
-    .tab-btn.active { color:var(--brown-dark); border-bottom-color:var(--gold); font-weight:600; }
-    .tab-content { display:none; }
-    .tab-content.active { display:block; }
-    /* QR */
-    #qr-canvas { display:block; margin:1rem auto; border:4px solid var(--border); border-radius:8px; }
-    /* Ricevuta print */
-    @media print {
-      body > *:not(#print-area) { display:none !important; }
-      #print-area { display:block !important; }
-    }
-    #print-area { display:none; }
+    .admin-nav{background:var(--brown-dark);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .admin-nav .brand{color:var(--cream);font-family:var(--font-display);font-size:1.1rem}
+    .admin-nav .nav-links{display:flex;gap:.5rem}
+    .admin-nav a{color:rgba(249,244,236,.75);text-decoration:none;font-size:.87rem;padding:.35rem .8rem;border-radius:6px;transition:all .15s}
+    .admin-nav a:hover,.admin-nav a.active{background:rgba(255,255,255,.12);color:var(--cream)}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .stat-card{background:var(--warm-white);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1rem;text-align:center}
+    .stat-card .val{font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--brown-dark)}
+    .stat-card .lbl{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--brown-light);margin-top:.2rem}
+    .stat-card.gold .val{color:var(--gold)}.stat-card.green .val{color:var(--green)}.stat-card.red .val{color:var(--red-soft)}
+    .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+    .filter-btn{padding:.35rem .9rem;border-radius:20px;border:1.5px solid var(--border);background:var(--cream);font-size:.83rem;cursor:pointer;transition:all .15s;font-family:var(--font-body);color:var(--brown-mid)}
+    .filter-btn.active{background:var(--brown-dark);color:var(--cream);border-color:var(--brown-dark)}
+    .actions-cell{display:flex;gap:.35rem;flex-wrap:wrap}
+    .table-wrap{overflow-x:auto}
+    .login-overlay{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:999}
+    .login-box{background:var(--warm-white);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center;box-shadow:0 8px 32px var(--shadow-deep)}
+    .login-box h2{margin-bottom:.5rem}.login-box p{color:var(--brown-light);font-size:.9rem;margin-bottom:1.5rem}
+    #login-error{color:var(--red-soft);font-size:.85rem;margin-top:.5rem;min-height:1.2em}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem}
+    .modal{background:var(--warm-white);border-radius:16px;padding:2rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+    .modal h2{font-size:1.3rem;margin-bottom:1.25rem}
+    .cucina-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem}
+    .cucina-card{background:var(--cream);border:2px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+    .cucina-card .cval{font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--brown-dark)}
+    .cucina-card .clbl{font-size:.82rem;color:var(--brown-light);margin-top:.25rem;text-transform:uppercase;letter-spacing:.05em}
+    @media print{body *{visibility:hidden!important}#ricevuta-print,#ricevuta-print *{visibility:visible!important}#ricevuta-print{position:fixed;inset:0;background:white;padding:2cm}}
+    #ricevuta-print{display:none}
+    .save-toast{position:fixed;bottom:2rem;right:2rem;background:var(--green);color:white;padding:.75rem 1.25rem;border-radius:10px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.15);transform:translateY(100px);opacity:0;transition:all .3s;z-index:100}
+    .save-toast.show{transform:translateY(0);opacity:1}
   </style>
 </head>
 <body>
 
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
-    <div style="font-size:2.5rem;margin-bottom:0.5rem">🔐</div>
+    <div style="font-size:2.5rem;margin-bottom:.5rem">🔐</div>
     <h2>Area Admin</h2>
     <p>Inserisci la password per accedere</p>
     <div class="form-group"><input type="password" id="pwd-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
@@ -71,103 +57,62 @@
   <div class="nav-links">
     <a href="index.html" class="active">📋 Prenotazioni</a>
     <a href="impostazioni.html">⚙️ Impostazioni</a>
-    <a href="/" target="_blank">🌐 Sito</a>
+    <a href="/" target="_blank">🌐 Sito pubblico</a>
     <a href="#" onclick="logout()">Esci</a>
   </div>
 </nav>
 
-<div class="container" style="max-width:1200px">
-
-  <!-- TABS -->
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('prenotazioni',this)">📋 Prenotazioni</button>
-    <button class="tab-btn" onclick="switchTab('cucina',this)">👨‍🍳 Riepilogo cucina</button>
-    <button class="tab-btn" onclick="switchTab('qr',this)">📱 QR Code</button>
-  </div>
-
-  <!-- TAB: PRENOTAZIONI -->
-  <div id="tab-prenotazioni" class="tab-content active">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem">
-      <h1 style="font-size:1.4rem">Prenotazioni</h1>
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-        <button class="btn btn-outline btn-sm" onclick="loadBookings()">🔄 Aggiorna</button>
-        <button class="btn btn-gold btn-sm" onclick="exportCSV()">⬇️ CSV</button>
-        <button class="btn btn-gold btn-sm" onclick="exportXLSX()">⬇️ XLSX</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteAll()">🗑️ Elimina tutti</button>
-      </div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card"><div class="val" id="stat-total">–</div><div class="lbl">Prenotazioni</div></div>
-      <div class="stat-card green"><div class="val" id="stat-pax">–</div><div class="lbl">Persone</div></div>
-      <div class="stat-card gold"><div class="val" id="stat-incasso">–</div><div class="lbl">Incasso confermato</div></div>
-      <div class="stat-card"><div class="val" id="stat-posti">–</div><div class="lbl">Posti rimasti</div></div>
-      <div class="stat-card red"><div class="val" id="stat-pending">–</div><div class="lbl">In attesa</div></div>
-      <div class="stat-card"><div class="val" id="stat-waitlist">–</div><div class="lbl">Lista d'attesa</div></div>
-    </div>
-
-    <div class="filters">
-      <span style="font-size:0.83rem;color:var(--brown-light)">Filtra:</span>
-      <button class="filter-btn active" onclick="setFilter('all',this)">Tutti</button>
-      <button class="filter-btn" onclick="setFilter('paid',this)">✅ Pagati</button>
-      <button class="filter-btn" onclick="setFilter('pending_secretariat',this)">🏛️ Segreteria</button>
-      <button class="filter-btn" onclick="setFilter('pending_satispay',this)">📱 Satispay</button>
-      <button class="filter-btn" onclick="setFilter('cancelled',this)">❌ Annullati</button>
-      <button class="filter-btn" onclick="setFilter('waitlist',this)">📋 Attesa</button>
-      <input type="text" id="search-input" placeholder="🔍 Cerca nome o email..." oninput="renderTable()"
-        style="margin-left:auto;padding:0.35rem 0.8rem;border:1.5px solid var(--border);border-radius:20px;font-size:0.85rem;font-family:var(--font-body);background:var(--cream);outline:none;width:200px" />
-    </div>
-
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th><th>Nome</th><th>Email</th><th>Tel</th><th>Ordine</th><th>Totale</th><th>Pagamento</th><th>Stato</th><th>Data</th><th>Nota</th><th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody id="bookings-tbody">
-            <tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--brown-light)">Caricamento...</td></tr>
-          </tbody>
-        </table>
-      </div>
+<div class="container" style="max-width:1100px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+    <h1 style="font-size:1.6rem">Prenotazioni</h1>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="loadBookings()">🔄 Aggiorna</button>
+      <button class="btn btn-outline btn-sm" onclick="showCucina()">👨‍🍳 Cucina</button>
+      <button class="btn btn-outline btn-sm" onclick="showQR()">📱 QR Code</button>
+      <button class="btn btn-gold btn-sm" onclick="exportXLSX()">⬇️ XLSX</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteAll()">🗑️ Elimina tutti</button>
     </div>
   </div>
 
-  <!-- TAB: CUCINA -->
-  <div id="tab-cucina" class="tab-content">
-    <h1 style="font-size:1.4rem;margin-bottom:1.25rem">👨‍🍳 Riepilogo per la cucina</h1>
-    <div class="card">
-      <div class="card-title"><span class="icon">🍽️</span> Totale per voce di menù</div>
-      <div class="cucina-grid" id="cucina-grid">
-        <div style="color:var(--brown-light);padding:1rem">Caricamento...</div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:1rem">
-      <div class="card-title"><span class="icon">💰</span> Solo prenotazioni confermate (pagate)</div>
-      <div class="cucina-grid" id="cucina-grid-paid">
-        <div style="color:var(--brown-light);padding:1rem">Caricamento...</div>
-      </div>
-    </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="val" id="stat-total">–</div><div class="lbl">Prenotazioni</div></div>
+    <div class="stat-card green"><div class="val" id="stat-pax">–</div><div class="lbl">Persone</div></div>
+    <div class="stat-card gold"><div class="val" id="stat-incasso">–</div><div class="lbl">Incasso</div></div>
+    <div class="stat-card"><div class="val" id="stat-posti">–</div><div class="lbl">Posti rimasti</div></div>
+    <div class="stat-card red"><div class="val" id="stat-pending">–</div><div class="lbl">In attesa</div></div>
+    <div class="stat-card"><div class="val" id="stat-waitlist">–</div><div class="lbl">Lista attesa</div></div>
   </div>
 
-  <!-- TAB: QR CODE -->
-  <div id="tab-qr" class="tab-content">
-    <h1 style="font-size:1.4rem;margin-bottom:1.25rem">📱 QR Code prenotazione</h1>
-    <div class="card" style="text-align:center;max-width:400px;margin:0 auto">
-      <div class="card-title" style="justify-content:center"><span class="icon">📱</span> QR Code per la bacheca</div>
-      <p style="font-size:0.9rem;color:var(--brown-light);margin-bottom:1rem">Stampa e affiggi questo QR code in chiesa o in bacheca.</p>
-      <canvas id="qr-canvas" width="250" height="250"></canvas>
-      <div style="font-size:0.8rem;color:var(--brown-light);margin:0.75rem 0" id="qr-url"></div>
-      <button class="btn btn-primary" onclick="printQR()" style="margin-top:0.5rem">🖨️ Stampa QR Code</button>
-    </div>
+  <div class="filters">
+    <span style="font-size:.83rem;color:var(--brown-light)">Filtra:</span>
+    <button class="filter-btn active" onclick="setFilter('all',this)">Tutti</button>
+    <button class="filter-btn" onclick="setFilter('paid',this)">✅ Pagati</button>
+    <button class="filter-btn" onclick="setFilter('pending_secretariat',this)">🏛️ Segreteria</button>
+    <button class="filter-btn" onclick="setFilter('pending_satispay',this)">📱 Satispay</button>
+    <button class="filter-btn" onclick="setFilter('waitlist',this)">⏳ Lista attesa</button>
+    <button class="filter-btn" onclick="setFilter('cancelled',this)">❌ Annullati</button>
+    <input type="text" id="search-input" placeholder="🔍 Cerca nome o email..." oninput="renderTable()"
+      style="margin-left:auto;padding:.35rem .8rem;border:1.5px solid var(--border);border-radius:20px;font-size:.85rem;font-family:var(--font-body);background:var(--cream);outline:none;width:200px" />
   </div>
 
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Nome</th><th>Email</th><th>Tel</th><th>Ordine</th>
+          <th>Totale</th><th>Pagamento</th><th>Stato</th><th>Data</th><th>Azioni</th>
+        </tr></thead>
+        <tbody id="bookings-tbody">
+          <tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--brown-light)">Caricamento...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL MODIFICA -->
-<div class="modal-overlay hidden" id="edit-modal">
-  <div class="modal-box">
+<div class="modal-overlay hidden" id="modal-edit">
+  <div class="modal">
     <h2>✏️ Modifica prenotazione</h2>
     <input type="hidden" id="edit-id" />
     <div class="form-row">
@@ -179,591 +124,179 @@
       <div class="form-group"><label>Telefono</label><input type="tel" id="edit-telefono" /></div>
     </div>
     <div class="form-group"><label>Note cliente</label><input type="text" id="edit-note" /></div>
-    <div class="form-group"><label>🔒 Nota interna admin</label><input type="text" id="edit-nota-admin" placeholder="Visibile solo agli admin" /></div>
-    <div id="edit-items-container" style="margin:1rem 0"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem">
-      <strong>Totale: <span id="edit-total" style="color:var(--gold)">€0.00</span></strong>
+    <div class="form-group"><label>📝 Nota interna (solo admin)</label><input type="text" id="edit-nota-interna" placeholder="Visibile solo in dashboard" /></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Stato pagamento</label>
+        <select id="edit-status">
+          <option value="paid">✅ Pagato</option>
+          <option value="pending_secretariat">🏛️ In attesa – Segreteria</option>
+          <option value="pending_satispay">📱 In attesa – Satispay</option>
+          <option value="cancelled">❌ Annullato</option>
+          <option value="waitlist">⏳ Lista d'attesa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Metodo di pagamento</label>
+        <select id="edit-payment">
+          <option value="paypal">PayPal</option>
+          <option value="satispay">Satispay</option>
+          <option value="secretariat">Segreteria</option>
+          <option value="waitlist">–</option>
+        </select>
+      </div>
     </div>
-    <div style="display:flex;gap:0.75rem;margin-top:1.25rem">
-      <button class="btn btn-primary" onclick="saveEdit()">💾 Salva</button>
-      <button class="btn btn-outline" onclick="closeEditModal()">Annulla</button>
+    <div id="edit-items-container" style="margin-bottom:1rem"></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1rem">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit')">Annulla</button>
+      <button class="btn btn-primary" style="width:auto" onclick="saveEdit()">💾 Salva</button>
     </div>
   </div>
 </div>
 
-<!-- AREA STAMPA RICEVUTA -->
-<div id="print-area"></div>
+<!-- MODAL CUCINA -->
+<div class="modal-overlay hidden" id="modal-cucina">
+  <div class="modal">
+    <h2>👨‍🍳 Riepilogo per la cucina</h2>
+    <p style="font-size:.85rem;color:var(--brown-light);margin-bottom:1.25rem">Prenotazioni attive (esclusi annullati)</p>
+    <div class="cucina-grid" id="cucina-grid"></div>
+    <div style="margin-top:1.5rem;padding-top:1rem;border-top:2px solid var(--border)">
+      <strong>Totale persone: <span id="cucina-totale">–</span></strong>
+    </div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1rem">
+      <button class="btn btn-outline" onclick="closeModal('modal-cucina')">Chiudi</button>
+      <button class="btn btn-gold" onclick="window.print()">🖨️ Stampa</button>
+    </div>
+  </div>
+</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- MODAL QR -->
+<div class="modal-overlay hidden" id="modal-qr">
+  <div class="modal" style="text-align:center">
+    <h2>📱 QR Code prenotazioni</h2>
+    <p style="font-size:.85rem;color:var(--brown-light);margin-bottom:.5rem">Stampalo e affiggi in chiesa o bacheca</p>
+    <canvas id="qr-canvas" width="256" height="256" style="border:4px solid var(--border);border-radius:8px;margin:1rem auto;display:block"></canvas>
+    <p style="font-size:.8rem;color:var(--brown-light);margin-bottom:1rem" id="qr-url"></p>
+    <div style="display:flex;gap:.75rem;justify-content:center">
+      <button class="btn btn-outline" onclick="closeModal('modal-qr')">Chiudi</button>
+      <button class="btn btn-gold" onclick="downloadQR()">⬇️ Scarica</button>
+      <button class="btn btn-primary" style="width:auto" onclick="printQR()">🖨️ Stampa</button>
+    </div>
+  </div>
+</div>
+
+<!-- RICEVUTA (per stampa) -->
+<div id="ricevuta-print"></div>
+<div class="save-toast" id="save-toast">✅ Salvato!</div>
 
 <script>
-let allBookings = [];
-let currentFilter = 'all';
-let adminToken = '';
-let configData = {};
+const CARTA_B64 = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEA3ADcAAD/2wBDAAIBAQEBAQIBAQECAgICAgQDAgICAgUEBAMEBgUGBgYFBgYGBwkIBgcJBwYGCAsICQoKCgoKBggLDAsKDAkKCgr/2wBDAQICAgICAgUDAwUKBwYHCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgr/wAARCAC4BcADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD97Ne13SPDGjXniLxBqUFlp+n2slzfXl1IEjghRSzyOx4VVUEkngAV+eum/wDBWT9jTUf2/V+L8mq+KrfR5PA//CIx6vcaQFss/b/tQvCvn+asR+7/AKnzOQSAAQPpf/gqVd3Nj+wF8TJ7S5eJ20OONmRsZV7mFWH0Kkg+oJr8Fsj1r77g3h7B5pg61au3u4KztZWTb2euqt6H4b4tcd5rwzmuEwmDhFpJVW5Ju7Umkt1ZaO/V30atr/TJZ3dvf2sd7Z3Ec0MyB4ZoXDK6kZDAjggjvUleW/sOTSz/ALGPwnlmkLMfhzovzHviyiFepV8HiKXsK86d78ra+52P2zA4j65g6Ve1ueMZW7XSdvxCiiisTqCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA5j4veEPCfj3wPN4T8daDa6ppN3fWX27T76MPDOi3cT7JEPDoSoypyrDIYEEg/Ifh74Yfszan8PvC2oXv7Mvwx/tDWPCPw91C6x4FsV3NrOsC2vmGI+NyHCY/wBX/DjpXv8A+2/+0P4K/Z9+APiTxRrHijSoNah0aS70HR7y/SOfUJo3Tasced7jeyBioO0Nk4FfkL4c/wCCjPj/AEDUtBuJPCcdxBoOh+E9Kht21IjfBod8t8nPl8GWUN2OxWx8+M19tw3lOZY7BznRuoqS62va17arpv8AcfkfiBxRw9kuaUqWL5XN05393mauny30drS1S6Xufsp+xlbQ2f7IPwrtrZNqL8OtF2rknH+gwnvXpVeO/sJfEjwB42/ZY+HujeEPGulane6P8P8AQ4tWsrHUI5ZrGQ2MYCTIrFomJRwAwBO1vQ17FXymPjKOOqqSs+Z7+p+k5LUp1Mnw8qbTXJHbbSKQUUUVyHphRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAfnL/wcAapP4UX4PeMtOsrC4urDUNZ8iHVNLgvLdi0dny8M6OkgBUHY4KHHzK2BXwP46/bd/aZ+JdtBp3jTx9Z3ljbxLHDpY8MabFZhB0X7PHbrEQPdTX3h/wAHEv8AyKPwr/7CWrf+i7Wvk/4z/GfxzffCjTfBXwx8deDl+Eq+CdOjXwpLeaaJ4tSGnwx3kslmAt617/aHnMtz5fzZEgfyCTX7JwtGk8iwrlSjJ3mrytoud6J2fvO+i0vZ66H8m+JM8VHjTMVTxNSnHlpNxhd8z9nHWSU4pQja0pe9y3Xuu59vf8ECrm51v4E/EDxZeC3jm1Dx8zTW9lYwW1vG32SFiY44kVYwS5/driNQAEVRnP3pXwP/AMG+P/Jr/jL/ALH1/wD0ita++K/O+Kv+SgxCXf8ARH714a3fA2Bb6wv98mFFFFfPn3AUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH5c/wDBw78QfDeoeKPhn8L7S+mbV9NsdR1O+tQrCOO3uGhihckphizW04GGyoQ7h86mvzdr7i/4L+H/AIzO0H/sm9l/6XX9fDua/fuE6UaPD2HUeqb+bbb/ADP4d8UMTUxXHmOlPpJR07RjGK/Ba+Z+of8Awb3fFbwj/wAIv45+B0mo3K69/aC67DZtD+5az8uK3eRXC8OJPLDBm5DIVHDmv0lr8h/+Dfb/AJOy8Wf9k7n/APS+yr9eK/LONKMKPENXl+0ot+rR/SvhDjK2L4Ew/Pb3HOKt2Una/nqFFFFfKH6aFFFFABRTZJY442keRVVRlmY8Cvl39on/AIK/fsY/AJJdO0/x1/wm2sIPl03wcUuowSON9zuECj1Cuzj+7niurB4HGY+p7PD03N+Svb17fM83NM5ynJcP7bH140o95NK/klu35JNn1JketeI/BT9ovUviD+2H8X/gdfeLdCutN8IWuiyeHbPT5VN0hlhlF8JuclkmEakdEDoDy1fmb+0j/wAFuf2svjQtxofww+x/DrRplZduisZ9RdGUAq15IoKkHJDQpCwzjJxXzJ4G+PXxs+GvxBm+K3gX4r+INN8SXUxkvtZt9Uk8+8YuHYTsSfPVmALLJuViOQa+8y/gHHSwtR4mUYylG0VvZ3Tu2tNk1pfRs/E888b8lp5lh45fCdSnCbc5fCpR5ZRtFPV6yUveUdYo/o7zRX5P/s2/8F9/it4UFv4f/ac+Hdr4ps12rJ4g0BUs78D5iXeHiCZj8oATyAAMnJr76/Zz/b9/ZT/alFvZfCr4sWDatOP+Rc1Vvsmo7tpYqsMmDLtVSS0RdQB1r5bMuG84yq7rU24r7UdY/etvmkfpXDviBwpxNaOExCVR/Yn7s79knpL/ALdckezUUbhnGaK8I+0CiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPx5/4L+f8nnaD/wBk3sv/AEuv68t8Efs46BrPwD1OwVPhnc+Iv+Fc3PjAS3Gra8muW1rDIZS8ey2/s8/uk8n7OzFiXLeYvG31L/gv5/yedoP/AGTey/8AS6/r5Z0L45+IPDsbGyOWuvAdz4YuevFvKz/0K/r9K/dMmpYitw7hfZO1kn222v5d11P4v4sxOX4bj3M3i4KSlJrVXtdK7XaXZ9NT60/4N9v+TsvFn/ZO5/8A0vsq/XivyH/4N9v+TsvFn/ZO5/8A0vsq/Xivzvjr/koJf4Y/kfvPgv8A8kLS/wAdT/0oKKKK+PP1cKD0oooA/Kj/AIL86n8ZPDfxU8M6QPiDr/8Awg/iTQTIug/2oq2DXttMPMHkR7dxVXt5N0oc7pDsbA2r+d1fpZ/wcVf8hT4R/wDXvrn/AKFYV+d3w28Baz8UfH+j/Dvw/LDHd6zqEVrHcXTFYbcM2GmlYA7IkXLu2MKisx4FfvHCNSMeGqNSVlpK/TaTV352WrP4n8UqFWfiHi6EG5NuCim7u8oQlZX2V5Oy6Fbwj4M8YfEDX4PCfgPwnqWuapdZFtpuj2MlzcS4GTtjjBZsAE8DpXcXf7Gn7W9jard3P7MvjwKysxVfCt2zxhepdBGWQf7wFdB8UP2n/wDhFNFuvgR+ylqV14b8CQ4hv9Us1NtqXi2RAVN3fSjEnluS5S1yI40YAqzZY+LwyS28y3FvI0ckbBo5EYhlYHIIPY17VOWOrLnSUF0TTbt52aUX5a+vRfI1qWS4OXsm5VZLeUZRjBPtG8Zua3973L9FbVo6PFI0UqMrK2GVlwQfQ0hr0SDxxrHx6RfB3xFnk1TxRIqx+GfEkyyS311MOEsLh1DPcrJxFE0gLRv5S70h3bfOwc1006kpXUlZr5r1T/4CPPxFGnTtOlLmi9m1Z3W6au7NaPRtWa1vdL9qP+CKuo/GbxX+yH/wn3xg8f6/ro1TxBcJ4ebXNUW78qxgCxZjY5lUGZZ0Ku2AIlKqoOW+wK+Xv+CNP/KOrwH/ANd9W/8ATpdV9Q1/PWfS5s7xFklaclZKy0bX6H93cExlHg/AXk5N0acm5O7vKKk9X5vTsrIKKKK8k+oCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA/F3/gt78Tfhx8Vv2tdF8R/C/4gaJ4k0+LwBZ28t9oOrQ3kKTC8vWMZeJmUMFdSVzkBge4r45r2D/goFFFB+278VI4YlRf+E51A7VXA5mYn9a8fr+jcloRw2U0KcXdKK381f9T+AeLsdUzHifGYiokm6kr220dtL+h9q/8ABC/4l/Dr4Y/tSeJNT+JHj3RfD9teeBpbWzuNc1SG0jnna9sysSNKyhnIViFGSQp44r9kwcjNfhb/AMEfbW1vP+CjPw5hvLaOVRJqrhZEDAMuk3jK3PcMAQexANfulX5V4gU4087UlvKCb+9pfl+J/TPgbialfg6cHa1OrKK77Rk2/wDwKyVum7voUUV4T+3L+2f8Ov2VPhbr0es+LrrRvFV54XvpfBcs3hu8uLW51EQyi3i89IGt9/mquY3cEKVZgFYE/H4XDV8ZXjRoxbk+iTf5dF1P1jMcxweVYOeKxU1CEVdttL5atK72Svqz3agnHNfiT/w+x/4KB/8ARSNH/wDCXtP/AIiregf8Flv+ChviTXbPw9YfE/w5FNfXSQRS6houn2sCM7BQZJpgscSZPLuyqo5JAGa+wfAGdxV3KH/gT/8AkT8pj44cGzkoxhWbf9yP/wAmew/8HDfiKw1Hxf8ADHw/b218s+n2urtPJPps8cDiT7EV8qZ0EcxG07hGzFCQG2kjP56+D/GWveBdWm1vw5crFcT6XfadIzIGzb3dpLaTrz3MM0gB7E57V+zHwW/ZQ8Uftm/B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FeXkkutahe3wto47SCF7iYGVgRGWSJlDkHaWBwelbcQZJl2bUlVxbklSUn7rWzs30d9tDj4F4yz7hjFSw2VxpuWIlCPvptXTajqpRsved73P1t/4ff8A7AvX/hMfEH/hMz1s/Dn/AIK//sVfFX4g6J8M/B3irXJNV8QapBp+mxzeH5o0aeaQIgLHhRuYcnpX53/E34O32ix3Wst+1F+ym2jxwtHb+FvD0yXQ+zjpArpp5uGfb8vntL55Pzebu+avNf2StBXw3+318L9OghKW7/ELQ7mxUzGQ/ZpriCaElykZYmKRDkomf7q9B8lHhHIauFqVIOd4xbWvZdbwXztf1P1KXijxrh8xoUK0KXLOcYP3GnaTtdWqy3V7Xs/I/fyiiivy0/pIKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK8y/bW5/Y1+LY/6plr3/AKbp69Nrzz9rrQ9a8TfsofE7w34c0m51DUNQ+HmtW1hY2cDSzXM0ljMqRoigs7sxChQCSSAK6sE1HGU2/wCaP5o87OIyllOISV24T/8ASWfN3/BKb9l39mf4i/sDeA/GPxA/Z38C67q95/an2zVdY8JWd1cz7dVu0XfLJGzNhFVRknCqAOAK+sPh/wDBr4RfCaCa1+Ffwt8O+GY7ht1xH4f0O3sllPqwhRd34147/wAEp/BHjP4c/sEeA/BnxB8J6loesWf9qfbNL1exktriDfql26745AGXKMrDI5DA9DX0NXdnmKrVc0xEeduPtJ2V21bmdrdLdjxODctwuG4ZwE/YxjU9jSu+VKV/Zxvd2ve+9/mfPf8AwVWt/Es//BPr4lx+EvM+1LpMDS+X1+yi7gNz+HkCXPtmtr/gnPceEbr9hv4Wy+CXtWs18G2aTfYguz7WqbbrOP4/tIm399+7POa9a8VeGdC8a+GdQ8HeKdLivtM1axms9Rs5xlJ4JUKSRt7MrEH618B+D9D/AG2P+CTfivVPBHgT4S6z8YvgnfXzXeippO6TUtEZ9zOhSNHZMbcv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FABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH/2Q==';
 
-// ============================================================
+let allBookings = [], currentFilter = 'all', adminToken = '', configData = {};
+
 // LOGIN
-// ============================================================
 function doLogin() {
-  const pwd = document.getElementById('pwd-input').value;
-  fetch('/api/admin-login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pwd}) })
-    .then(r=>r.json()).then(data => {
-      if (data.token) {
-        adminToken = data.token;
-        sessionStorage.setItem('adminToken', adminToken);
-        document.getElementById('login-overlay').style.display = 'none';
-        loadData();
-      } else { document.getElementById('login-error').textContent = 'Password errata.'; }
-    }).catch(() => { document.getElementById('login-error').textContent = 'Errore di connessione.'; });
+  fetch('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('pwd-input').value})})
+    .then(r=>r.json()).then(d=>{
+      if(d.token){adminToken=d.token;sessionStorage.setItem('adminToken',adminToken);document.getElementById('login-overlay').style.display='none';loadData();}
+      else document.getElementById('login-error').textContent='Password errata.';
+    }).catch(()=>document.getElementById('login-error').textContent='Errore di connessione.');
 }
-function logout() { sessionStorage.removeItem('adminToken'); location.reload(); }
-function authHeaders() { return { 'Content-Type':'application/json', 'Authorization':'Bearer '+adminToken }; }
+function logout(){sessionStorage.removeItem('adminToken');location.reload();}
+function authHeaders(){return{'Content-Type':'application/json','Authorization':'Bearer '+adminToken};}
 
-// ============================================================
-// TABS
-// ============================================================
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  btn.classList.add('active');
-  if (name === 'cucina') renderCucina();
-  if (name === 'qr') renderQR();
-}
-
-// ============================================================
-// LOAD DATA
-// ============================================================
-async function loadData() {
-  const cfgRes = await fetch('/api/get-config', { headers: authHeaders() });
-  configData = await cfgRes.json();
-  await loadBookings();
-}
-
-async function loadBookings() {
-  try {
-    const res = await fetch('/api/get-prenotazioni', { headers: authHeaders() });
-    allBookings = await res.json();
-    updateStats();
-    renderTable();
-  } catch(e) { console.error(e); }
-}
-
-// ============================================================
-// STATS
-// ============================================================
-function updateStats() {
-  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
-  const paid = allBookings.filter(b => b.status === 'paid');
-  const pending = allBookings.filter(b => b.status !== 'paid' && b.status !== 'cancelled' && b.status !== 'waitlist');
-  const waitlist = allBookings.filter(b => b.status === 'waitlist');
-  const pax = active.reduce((a,b) => a + totalPax(b), 0);
-  const incasso = paid.reduce((a,b) => a + (b.total||0), 0);
-  document.getElementById('stat-total').textContent = active.length;
-  document.getElementById('stat-pax').textContent = pax;
-  document.getElementById('stat-incasso').textContent = '€'+incasso.toFixed(0);
-  document.getElementById('stat-posti').textContent = Math.max(0, (configData.maxSeats||320) - pax);
-  document.getElementById('stat-pending').textContent = pending.length;
-  document.getElementById('stat-waitlist').textContent = waitlist.length;
-}
-function totalPax(b) { if (!b.items || !b.items.length) return 0; return b.items.reduce((a,i) => a+(i.qty||1), 0); }
-
-// ============================================================
-// TABLE
-// ============================================================
-function setFilter(f, el) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  renderTable();
-}
-
-function renderTable() {
-  const search = (document.getElementById('search-input').value||'').toLowerCase();
-  let rows = allBookings.filter(b => {
-    if (currentFilter !== 'all' && b.status !== currentFilter) return false;
-    if (search) { const hay = `${b.nome} ${b.cognome} ${b.email}`.toLowerCase(); if (!hay.includes(search)) return false; }
-    return true;
-  });
-  const tbody = document.getElementById('bookings-tbody');
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--brown-light)">Nessuna prenotazione trovata.</td></tr>'; return; }
-  const statusMap = { paid:'<span class="badge badge-paid">✅ Pagato</span>', pending_satispay:'<span class="badge badge-pending">📱 Satispay</span>', pending_secretariat:'<span class="badge badge-secretariat">🏛️ Segreteria</span>', cancelled:'<span class="badge badge-cancelled">❌ Annullato</span>', waitlist:'<span class="badge badge-pending">📋 Attesa</span>' };
-  const payMap = { paypal:'PayPal', satispay:'Satispay', secretariat:'Segreteria', waitlist:'–' };
-  tbody.innerHTML = rows.map(b => {
-    const itemsStr = (b.items||[]).map(it => `${it.qty}× ${it.name}`).join(', ') || '–';
-    const date = b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '–';
-    const shortId = (b.id||'').substring(0,8).toUpperCase();
-    return `<tr>
-      <td><code style="font-size:0.75rem">${shortId}</code></td>
-      <td><strong>${b.nome} ${b.cognome}</strong></td>
-      <td style="font-size:0.83rem">${b.email}</td>
-      <td style="font-size:0.83rem">${b.telefono||'–'}</td>
-      <td style="font-size:0.82rem;max-width:180px">${itemsStr}</td>
-      <td><strong>€${(b.total||0).toFixed(2)}</strong></td>
-      <td style="font-size:0.83rem">${payMap[b.paymentMethod]||b.paymentMethod}</td>
-      <td>${statusMap[b.status]||b.status}</td>
-      <td style="font-size:0.82rem">${date}</td>
-      <td style="font-size:0.82rem;max-width:120px;color:var(--brown-light)">${b.notaAdmin||'–'}</td>
-      <td>
-        <div class="actions-cell">
-          ${b.status !== 'paid' && b.status !== 'cancelled' && b.status !== 'waitlist' ? `<button class="btn btn-sm btn-gold" onclick="markPaid('${b.id}')">✅</button>` : ''}
-          <button class="btn btn-sm btn-outline" onclick="openEditModal('${b.id}')" title="Modifica">✏️</button>
-          <button class="btn btn-sm btn-outline" onclick="printRicevuta('${b.id}')" title="Ricevuta">🖨️</button>
-          ${b.status !== 'cancelled' ? `<button class="btn btn-sm btn-danger" onclick="cancelBooking('${b.id}')" title="Annulla">✕</button>` : ''}
-          <button class="btn btn-sm btn-outline" onclick="deleteBooking('${b.id}')" style="color:var(--red-soft)" title="Elimina">🗑️</button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// ============================================================
-// ACTIONS
-// ============================================================
-async function markPaid(id) {
-  if (!confirm('Segna come pagata?')) return;
-  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id,status:'paid'}) });
-  await loadBookings();
-}
-async function cancelBooking(id) {
-  if (!confirm('Annullare questa prenotazione?')) return;
-  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id,status:'cancelled'}) });
-  await loadBookings();
-}
-async function deleteBooking(id) {
-  if (!confirm('Eliminare definitivamente? Operazione irreversibile.')) return;
-  await fetch('/api/delete-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id}) });
-  await loadBookings();
-}
-async function deleteAll() {
-  if (!confirm('⚠️ Eliminare TUTTE le prenotazioni?')) return;
-  if (!confirm('Sei sicuro? Operazione irreversibile!')) return;
-  await fetch('/api/delete-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({deleteAll:true}) });
-  await loadBookings();
-}
-
-// ============================================================
-// EDIT MODAL
-// ============================================================
-let editMenuItems = [];
-let editQty = {};
-
-function openEditModal(id) {
-  const b = allBookings.find(x => x.id === id);
-  if (!b) return;
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-nome').value = b.nome;
-  document.getElementById('edit-cognome').value = b.cognome;
-  document.getElementById('edit-email').value = b.email;
-  document.getElementById('edit-telefono').value = b.telefono||'';
-  document.getElementById('edit-note').value = b.note||'';
-  document.getElementById('edit-nota-admin').value = b.notaAdmin||'';
-
-  editMenuItems = configData.menuItems || [];
-  editQty = {};
-  editMenuItems.forEach(item => { editQty[item.id] = 0; });
-  (b.items||[]).forEach(it => { editQty[it.id] = it.qty; });
-
-  renderEditItems();
-  document.getElementById('edit-modal').classList.remove('hidden');
-}
-
-function renderEditItems() {
-  const c = document.getElementById('edit-items-container');
-  c.innerHTML = '<div class="card-title" style="font-size:0.9rem;margin-bottom:0.75rem"><span class="icon">🍽️</span> Ordine</div>' +
-    editMenuItems.map(item => `
-      <div class="menu-item">
-        <div class="menu-item-info"><div class="name">${item.name}</div></div>
-        <div class="menu-item-price">€${parseFloat(item.price).toFixed(2)}</div>
-        <div class="qty-control">
-          <button class="qty-btn" onclick="editChangeQty('${item.id}',-1)">−</button>
-          <span class="qty-val" id="eqty-${item.id}">${editQty[item.id]||0}</span>
-          <button class="qty-btn" onclick="editChangeQty('${item.id}',+1)">+</button>
-        </div>
-      </div>`).join('');
-  updateEditTotal();
-}
-
-function editChangeQty(id, delta) {
-  editQty[id] = Math.max(0, (editQty[id]||0) + delta);
-  document.getElementById('eqty-'+id).textContent = editQty[id];
-  updateEditTotal();
-}
-function updateEditTotal() {
-  const total = editMenuItems.reduce((a,item) => a + (editQty[item.id]||0) * parseFloat(item.price), 0);
-  document.getElementById('edit-total').textContent = '€'+total.toFixed(2);
-}
-function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
-
-async function saveEdit() {
-  const id = document.getElementById('edit-id').value;
-  const items = editMenuItems.filter(item => (editQty[item.id]||0) > 0).map(item => ({ id:item.id, name:item.name, qty:editQty[item.id], price:item.price }));
-  const total = editMenuItems.reduce((a,item) => a + (editQty[item.id]||0) * parseFloat(item.price), 0);
-  const updates = {
-    id,
-    nome: document.getElementById('edit-nome').value.trim(),
-    cognome: document.getElementById('edit-cognome').value.trim(),
-    email: document.getElementById('edit-email').value.trim(),
-    telefono: document.getElementById('edit-telefono').value.trim(),
-    note: document.getElementById('edit-note').value.trim(),
-    notaAdmin: document.getElementById('edit-nota-admin').value.trim(),
-    items, total
-  };
-  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify(updates) });
-  closeEditModal();
-  await loadBookings();
-}
-
-// ============================================================
-// RICEVUTA PDF (stampa browser)
-// ============================================================
-function printRicevuta(id) {
-  const b = allBookings.find(x => x.id === id);
-  if (!b) return;
-  const metodiLabel = { paypal:'PayPal', satispay:'Satispay', secretariat:'Segreteria parrocchiale' };
-  const statiLabel = { paid:'Pagato ✅', pending_satispay:'In attesa (Satispay)', pending_secretariat:'In attesa (Segreteria)', cancelled:'Annullato' };
-  const itemsHtml = (b.items||[]).map(i => `<tr><td>${i.name}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right">€${(i.qty*parseFloat(i.price)).toFixed(2)}</td></tr>`).join('');
-  const date = b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '–';
-
-  const printArea = document.getElementById('print-area');
-  printArea.innerHTML = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:2rem">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #2C1A0E;padding-bottom:1rem;margin-bottom:1.5rem">
-        <div>
-          <div style="font-size:1.3rem;font-weight:700;color:#2C1A0E">Parrocchia San Luigi Gonzaga</div>
-          <div style="font-size:0.85rem;color:#666;margin-top:0.25rem">Via Tagliamento 10, 20139 Milano</div>
-          <div style="font-size:0.85rem;color:#666">Tel 02/35991032 · sanluigi@chiesadimilano.it</div>
-          <div style="font-size:0.85rem;color:#666">CF: 97050190152</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.1em">Ricevuta</div>
-          <div style="font-size:1.1rem;font-weight:700;color:#2C1A0E">#${(b.id||'').substring(0,8).toUpperCase()}</div>
-          <div style="font-size:0.85rem;color:#666">${date}</div>
-        </div>
-      </div>
-      <div style="margin-bottom:1.5rem">
-        <div style="font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">Intestata a</div>
-        <div style="font-size:1.1rem;font-weight:700">${b.nome} ${b.cognome}</div>
-        <div style="font-size:0.9rem;color:#666">${b.email}${b.telefono ? ' · '+b.telefono : ''}</div>
-      </div>
-      <div style="margin-bottom:1rem">
-        <div style="font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem">Dettaglio ordine</div>
-        <table style="width:100%;border-collapse:collapse">
-          <thead>
-            <tr style="background:#2C1A0E;color:white">
-              <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.8rem">Voce</th>
-              <th style="padding:0.5rem 0.75rem;text-align:center;font-size:0.8rem">Qtà</th>
-              <th style="padding:0.5rem 0.75rem;text-align:right;font-size:0.8rem">Importo</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-          <tfoot>
-            <tr style="border-top:2px solid #2C1A0E">
-              <td colspan="2" style="padding:0.6rem 0.75rem;font-weight:700">Totale</td>
-              <td style="padding:0.6rem 0.75rem;text-align:right;font-weight:700;font-size:1.1rem">€${(b.total||0).toFixed(2)}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      <div style="display:flex;gap:2rem;font-size:0.85rem;color:#666;margin-top:1rem">
-        <div><strong>Metodo:</strong> ${metodiLabel[b.paymentMethod]||b.paymentMethod}</div>
-        <div><strong>Stato:</strong> ${statiLabel[b.status]||b.status}</div>
-      </div>
-      ${b.note ? `<div style="margin-top:0.75rem;font-size:0.85rem;color:#666"><strong>Note:</strong> ${b.note}</div>` : ''}
-      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid #eee;text-align:center;font-size:0.8rem;color:#999">
-        Pranzo in Parrocchia · Parrocchia San Luigi Gonzaga Milano
-      </div>
-    </div>`;
-  window.print();
-}
-
-// ============================================================
-// CUCINA
-// ============================================================
-function renderCucina() {
-  const menuItems = configData.menuItems || [];
-  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
-  const paid = allBookings.filter(b => b.status === 'paid');
-  [['cucina-grid', active], ['cucina-grid-paid', paid]].forEach(([gridId, bookings]) => {
-    const totals = {};
-    menuItems.forEach(item => { totals[item.id] = { name: item.name, qty: 0 }; });
-    bookings.forEach(b => (b.items||[]).forEach(i => { if (totals[i.id]) totals[i.id].qty += i.qty||1; }));
-    const grid = document.getElementById(gridId);
-    const items = Object.values(totals);
-    if (!items.length) { grid.innerHTML = '<div style="color:var(--brown-light)">Nessun dato.</div>'; return; }
-    grid.innerHTML = items.map(i => `
-      <div class="cucina-item">
-        <div class="cval">${i.qty}</div>
-        <div class="clbl">${i.name}</div>
-      </div>`).join('') + `<div class="cucina-item" style="border-color:var(--gold)">
-        <div class="cval" style="color:var(--gold)">${bookings.filter(b=>b.status!=='cancelled'&&b.status!=='waitlist').reduce((a,b)=>a+totalPax(b),0)}</div>
-        <div class="clbl">Persone totali</div>
-      </div>`;
-  });
-}
-
-// ============================================================
-// QR CODE
-// ============================================================
-function renderQR() {
-  const url = window.location.origin + '/';
-  document.getElementById('qr-url').textContent = url;
-  const canvas = document.getElementById('qr-canvas');
-  const ctx = canvas.getContext('2d');
-  const size = 250;
-  // Simple QR placeholder — use qrcode.js for real QR
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0,0,size,size);
-  ctx.fillStyle = '#2C1A0E';
-  ctx.font = 'bold 14px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('QR Code', size/2, size/2 - 20);
-  ctx.font = '11px Arial';
-  ctx.fillStyle = '#666';
-  const words = url.split('/');
-  ctx.fillText(url, size/2, size/2 + 10);
-  ctx.fillText('Carico libreria QR...', size/2, size/2 + 30);
-
-  // Load QRCode library and generate
-  const script = document.createElement('script');
-  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-  script.onload = () => {
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0,0,size,size);
-    const div = document.createElement('div');
-    new QRCode(div, { text: url, width: size, height: size, colorDark:'#2C1A0E', colorLight:'#ffffff' });
-    setTimeout(() => {
-      const img = div.querySelector('img');
-      if (img) { const i = new Image(); i.onload = () => ctx.drawImage(i,0,0,size,size); i.src = img.src; }
-      else {
-        const c = div.querySelector('canvas');
-        if (c) ctx.drawImage(c,0,0,size,size);
-      }
-    }, 300);
-  };
-  if (!window.QRCode) document.head.appendChild(script);
-  else { script.onload(); }
-}
-
-function printQR() {
-  const canvas = document.getElementById('qr-canvas');
-  const url = document.getElementById('qr-url').textContent;
-  const w = window.open('','_blank');
-  w.document.write(`<html><body style="text-align:center;font-family:Arial,sans-serif;padding:2rem">
-    <h2>Parrocchia San Luigi Gonzaga</h2>
-    <h3>🍲 Prenota il Pranzo in Parrocchia</h3>
-    <img src="${canvas.toDataURL()}" style="width:250px;height:250px;border:4px solid #2C1A0E;border-radius:8px" />
-    <p style="font-size:1rem;margin-top:1rem">${url}</p>
-    <p style="font-size:0.85rem;color:#666">Inquadra il QR code con il tuo smartphone per prenotare</p>
-    <script>window.print()<\/script>
-  </body></html>`);
-}
-
-// ============================================================
-// EXPORT CSV
-// ============================================================
-function exportCSV() {
-  const header = ['ID','Nome','Cognome','Email','Telefono','Ordine','Totale','Pagamento','Stato','Data','Note','Nota Admin'];
-  const rows = allBookings.map(b => [
-    (b.id||'').substring(0,8).toUpperCase(), b.nome, b.cognome, b.email, b.telefono||'',
-    (b.items||[]).map(i=>`${i.qty}x ${i.name}`).join(' | '),
-    (b.total||0).toFixed(2), b.paymentMethod, b.status,
-    b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '', b.note||'', b.notaAdmin||''
-  ]);
-  const csv = [header,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
-  a.download = `prenotazioni_${new Date().toISOString().split('T')[0]}.csv`;
-  a.click();
-}
-
-// ============================================================
-// EXPORT XLSX
-// ============================================================
-function exportXLSX() {
-  const menuItems = configData.menuItems || [];
-  const wb = XLSX.utils.book_new();
-
-  // Foglio 1: Prenotazioni
-  const header = ['ID','Nome','Cognome','Email','Telefono','Ordine','Totale €','Pagamento','Stato','Data','Note','Nota Admin'];
-  const rows = allBookings.filter(b=>b.status!=='waitlist').map(b => [
-    (b.id||'').substring(0,8).toUpperCase(), b.nome, b.cognome, b.email, b.telefono||'',
-    (b.items||[]).map(i=>`${i.qty}x ${i.name}`).join(' | '),
-    parseFloat((b.total||0).toFixed(2)),
-    {paypal:'PayPal',satispay:'Satispay',secretariat:'Segreteria'}[b.paymentMethod]||b.paymentMethod,
-    {paid:'Pagato',pending_satispay:'In attesa Satispay',pending_secretariat:'In attesa Segreteria',cancelled:'Annullato'}[b.status]||b.status,
-    b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '', b.note||'', b.notaAdmin||''
-  ]);
-  const ws1 = XLSX.utils.aoa_to_sheet([header,...rows]);
-  ws1['!cols'] = [8,12,12,24,14,30,10,12,18,12,20,20].map(w=>({wch:w}));
-  XLSX.utils.book_append_sheet(wb, ws1, 'Prenotazioni');
-
-  // Foglio 2: Riepilogo cucina
-  const active = allBookings.filter(b=>b.status!=='cancelled'&&b.status!=='waitlist');
-  const totals = {};
-  menuItems.forEach(item => { totals[item.id] = { name:item.name, qty:0, qtyPaid:0 }; });
-  active.forEach(b => (b.items||[]).forEach(i => { if(totals[i.id]) { totals[i.id].qty += i.qty||1; if(b.status==='paid') totals[i.id].qtyPaid += i.qty||1; } }));
-  const cucinaRows = [['Voce','Totale prenotati','Di cui pagati'], ...Object.values(totals).map(i=>[i.name,i.qty,i.qtyPaid])];
-  const ws2 = XLSX.utils.aoa_to_sheet(cucinaRows);
-  ws2['!cols'] = [{wch:25},{wch:18},{wch:15}];
-  XLSX.utils.book_append_sheet(wb, ws2, 'Riepilogo cucina');
-
-  XLSX.writeFile(wb, `prenotazioni_${new Date().toISOString().split('T')[0]}.xlsx`);
-}
-
-// ============================================================
-// AUTO-LOGIN
-// ============================================================
-const saved = sessionStorage.getItem('adminToken');
-if (saved) { adminToken = saved; document.getElementById('login-overlay').style.display = 'none'; loadData(); }
-</script>
-</body>
-</html>
-
-// ============================================================
-// STATE
-// ============================================================
-let allBookings = [];
-let currentFilter = 'all';
-let adminToken = '';
-let configData = {};
-
-// ============================================================
-// LOGIN
-// ============================================================
-function doLogin() {
-  const pwd = document.getElementById('pwd-input').value;
-  fetch('/api/admin-login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pwd}) })
-    .then(r=>r.json()).then(data => {
-      if (data.token) {
-        adminToken = data.token;
-        sessionStorage.setItem('adminToken', adminToken);
-        document.getElementById('login-overlay').style.display = 'none';
-        loadData();
-      } else { document.getElementById('login-error').textContent = 'Password errata.'; }
-    }).catch(() => { document.getElementById('login-error').textContent = 'Errore di connessione.'; });
-}
-function logout() { sessionStorage.removeItem('adminToken'); location.reload(); }
-function authHeaders() { return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
-
-// ============================================================
 // LOAD
-// ============================================================
-async function loadData() {
-  const cfgRes = await fetch('/api/get-config', { headers: authHeaders() });
-  configData = await cfgRes.json();
+async function loadData(){
+  const r=await fetch('/api/get-config',{headers:authHeaders()});configData=await r.json();
   await loadBookings();
 }
-async function loadBookings() {
-  try {
-    const res = await fetch('/api/get-prenotazioni', { headers: authHeaders() });
-    allBookings = await res.json();
-    updateStats();
-    renderTable();
-  } catch(e) { console.error(e); }
+async function loadBookings(){
+  try{const r=await fetch('/api/get-prenotazioni',{headers:authHeaders()});allBookings=await r.json();updateStats();renderTable();}
+  catch(e){console.error(e);}
 }
 
-// ============================================================
 // STATS
-// ============================================================
-function updateStats() {
-  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
-  const paid = allBookings.filter(b => b.status === 'paid');
-  const pending = allBookings.filter(b => b.status !== 'paid' && b.status !== 'cancelled' && b.status !== 'waitlist');
-  const waitlist = allBookings.filter(b => b.status === 'waitlist');
-  const pax = active.reduce((a,b) => a + totalPax(b), 0);
-  const incasso = paid.reduce((a,b) => a + (b.total||0), 0);
-  const maxSeats = configData.maxSeats || 320;
-  document.getElementById('stat-total').textContent = active.length;
-  document.getElementById('stat-pax').textContent = pax;
-  document.getElementById('stat-incasso').textContent = '€' + incasso.toFixed(0);
-  document.getElementById('stat-posti').textContent = Math.max(0, maxSeats - pax);
-  document.getElementById('stat-pending').textContent = pending.length;
-  document.getElementById('stat-waitlist').textContent = waitlist.length;
+function updateStats(){
+  const active=allBookings.filter(b=>b.status!=='cancelled'&&b.status!=='waitlist');
+  const paid=allBookings.filter(b=>b.status==='paid');
+  const pending=allBookings.filter(b=>b.status!=='paid'&&b.status!=='cancelled'&&b.status!=='waitlist');
+  const waitlist=allBookings.filter(b=>b.status==='waitlist');
+  const pax=active.reduce((a,b)=>a+totalPax(b),0);
+  const incasso=paid.reduce((a,b)=>a+(b.total||0),0);
+  document.getElementById('stat-total').textContent=active.length;
+  document.getElementById('stat-pax').textContent=pax;
+  document.getElementById('stat-incasso').textContent='€'+incasso.toFixed(0);
+  document.getElementById('stat-posti').textContent=Math.max(0,(configData.maxSeats||320)-pax);
+  document.getElementById('stat-pending').textContent=pending.length;
+  document.getElementById('stat-waitlist').textContent=waitlist.length;
 }
-function totalPax(b) { if (!b.items || !b.items.length) return 0; return b.items.reduce((a,i) => a+(i.qty||1), 0); }
+function totalPax(b){return(b.items||[]).reduce((a,i)=>a+(i.qty||1),0);}
 
-// ============================================================
 // FILTER + TABLE
-// ============================================================
-function setFilter(f, el) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  renderTable();
-}
+function setFilter(f,el){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderTable();}
 
-function renderTable() {
-  const search = (document.getElementById('search-input').value || '').toLowerCase();
-  let rows = allBookings.filter(b => {
-    if (currentFilter !== 'all' && b.status !== currentFilter) return false;
-    if (search) { const hay = `${b.nome} ${b.cognome} ${b.email}`.toLowerCase(); if (!hay.includes(search)) return false; }
+function renderTable(){
+  const search=(document.getElementById('search-input').value||'').toLowerCase();
+  const rows=allBookings.filter(b=>{
+    if(currentFilter!=='all'&&b.status!==currentFilter)return false;
+    if(search&&!(`${b.nome} ${b.cognome} ${b.email}`).toLowerCase().includes(search))return false;
     return true;
   });
-  const tbody = document.getElementById('bookings-tbody');
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--brown-light)">Nessuna prenotazione trovata.</td></tr>'; return; }
-  const statusMap = {
-    paid: '<span class="badge badge-paid">✅ Pagato</span>',
-    pending_satispay: '<span class="badge badge-pending">📱 Satispay</span>',
-    pending_secretariat: '<span class="badge badge-secretariat">🏛️ Segreteria</span>',
-    cancelled: '<span class="badge badge-cancelled">❌ Annullato</span>',
-    waitlist: '<span class="badge" style="background:#EDE9FE;color:#5B21B6">⏳ Attesa</span>'
+  const tbody=document.getElementById('bookings-tbody');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--brown-light)">Nessuna prenotazione trovata.</td></tr>';return;}
+  const statusMap={
+    paid:'<span class="badge badge-paid">✅ Pagato</span>',
+    pending_satispay:'<span class="badge badge-pending">📱 Satispay</span>',
+    pending_secretariat:'<span class="badge badge-secretariat">🏛️ Segreteria</span>',
+    cancelled:'<span class="badge badge-cancelled">❌ Annullato</span>',
+    waitlist:'<span class="badge" style="background:#EDE9FE;color:#5B21B6">⏳ Attesa</span>'
   };
-  const payMap = { paypal:'PayPal', satispay:'Satispay', secretariat:'Segreteria', waitlist:'–' };
-  tbody.innerHTML = rows.map(b => {
-    const itemsStr = (b.items||[]).map(it => `${it.qty}× ${it.name}`).join(', ') || '–';
-    const date = b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '–';
-    const shortId = (b.id||'').substring(0,8).toUpperCase();
-    const notaInterna = b.notaInterna ? `<br><span style="font-size:0.75rem;color:var(--gold)">📝 ${b.notaInterna}</span>` : '';
+  const payMap={paypal:'PayPal',satispay:'Satispay',secretariat:'Segreteria',waitlist:'–'};
+  tbody.innerHTML=rows.map(b=>{
+    const items=(b.items||[]).map(i=>`${i.qty}× ${i.name}`).join(', ')||'–';
+    const date=b.createdAt?new Date(b.createdAt).toLocaleDateString('it-IT'):'–';
+    const nota=b.notaInterna?`<br><span style="font-size:.75rem;color:var(--gold)">📝 ${b.notaInterna}</span>`:'';
     return `<tr>
-      <td><code style="font-size:0.75rem">${shortId}</code></td>
-      <td><strong>${b.nome} ${b.cognome}</strong>${notaInterna}</td>
-      <td style="font-size:0.83rem">${b.email}</td>
-      <td style="font-size:0.83rem">${b.telefono||'–'}</td>
-      <td style="font-size:0.82rem;max-width:180px">${itemsStr}</td>
+      <td><code style="font-size:.75rem">${(b.id||'').substring(0,8).toUpperCase()}</code></td>
+      <td><strong>${b.nome} ${b.cognome}</strong>${nota}</td>
+      <td style="font-size:.83rem">${b.email}</td>
+      <td style="font-size:.83rem">${b.telefono||'–'}</td>
+      <td style="font-size:.82rem;max-width:180px">${items}</td>
       <td><strong>€${(b.total||0).toFixed(2)}</strong></td>
-      <td style="font-size:0.83rem">${payMap[b.paymentMethod]||b.paymentMethod}</td>
+      <td style="font-size:.83rem">${payMap[b.paymentMethod]||b.paymentMethod||'–'}</td>
       <td>${statusMap[b.status]||b.status}</td>
-      <td style="font-size:0.82rem">${date}</td>
-      <td>
-        <div class="actions-cell">
-          ${b.status !== 'paid' && b.status !== 'cancelled' && b.status !== 'waitlist' ? `<button class="btn btn-sm btn-gold" onclick="markPaid('${b.id}')">✅</button>` : ''}
-          <button class="btn btn-sm btn-outline" onclick="openEdit('${b.id}')" title="Modifica">✏️</button>
-          ${b.status !== 'waitlist' ? `<button class="btn btn-sm btn-outline" onclick="printRicevuta('${b.id}')" title="Ricevuta">🖨️</button>` : ''}
-          <button class="btn btn-sm btn-outline" onclick="deleteBooking('${b.id}')" style="color:var(--red-soft)" title="Elimina">🗑️</button>
-        </div>
-      </td>
+      <td style="font-size:.82rem">${date}</td>
+      <td><div class="actions-cell">
+        ${b.status!=='paid'&&b.status!=='cancelled'&&b.status!=='waitlist'?`<button class="btn btn-sm btn-gold" onclick="markPaid('${b.id}')">✅</button>`:''}
+        <button class="btn btn-sm btn-outline" onclick="openEdit('${b.id}')" title="Modifica">✏️</button>
+        ${b.status!=='waitlist'?`<button class="btn btn-sm btn-outline" onclick="printRicevuta('${b.id}')" title="Ricevuta">🖨️</button>`:''}
+        <button class="btn btn-sm btn-outline" onclick="deleteBooking('${b.id}')" style="color:var(--red-soft)" title="Elimina">🗑️</button>
+      </div></td>
     </tr>`;
   }).join('');
 }
 
-// ============================================================
 // EDIT MODAL
-// ============================================================
-function openEdit(id) {
-  const b = allBookings.find(x => x.id === id);
-  if (!b) return;
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-nome').value = b.nome || '';
-  document.getElementById('edit-cognome').value = b.cognome || '';
-  document.getElementById('edit-email').value = b.email || '';
-  document.getElementById('edit-telefono').value = b.telefono || '';
-  document.getElementById('edit-note').value = b.note || '';
-  document.getElementById('edit-nota-interna').value = b.notaInterna || '';
-  document.getElementById('edit-status').value = b.status || 'pending_secretariat';
-  // Edit items
-  const menuItems = configData.menuItems || [];
-  const editItems = document.getElementById('edit-items-container');
-  editItems.innerHTML = '<div class="card-title" style="font-size:0.95rem;margin-bottom:0.75rem"><span>🍽️</span> Ordine</div>' +
-    menuItems.map(item => {
-      const current = (b.items||[]).find(i => i.id === item.id);
-      const qty = current ? current.qty : 0;
-      return `<div class="menu-item" style="padding:0.6rem 0">
-        <div class="menu-item-info"><div class="name" style="font-size:0.9rem">${item.name}</div></div>
-        <div class="menu-item-price" style="font-size:0.95rem">€${parseFloat(item.price).toFixed(2)}</div>
+function openEdit(id){
+  const b=allBookings.find(x=>x.id===id);if(!b)return;
+  document.getElementById('edit-id').value=id;
+  document.getElementById('edit-nome').value=b.nome||'';
+  document.getElementById('edit-cognome').value=b.cognome||'';
+  document.getElementById('edit-email').value=b.email||'';
+  document.getElementById('edit-telefono').value=b.telefono||'';
+  document.getElementById('edit-note').value=b.note||'';
+  document.getElementById('edit-nota-interna').value=b.notaInterna||'';
+  document.getElementById('edit-status').value=b.status||'pending_secretariat';
+  document.getElementById('edit-payment').value=b.paymentMethod||'secretariat';
+  const menuItems=configData.menuItems||[];
+  document.getElementById('edit-items-container').innerHTML=
+    '<div style="font-weight:600;font-size:.9rem;margin-bottom:.75rem;color:var(--brown-mid)">🍽️ Ordine</div>'+
+    menuItems.map(item=>{
+      const cur=(b.items||[]).find(i=>i.id===item.id);
+      const qty=cur?cur.qty:0;
+      return `<div class="menu-item" style="padding:.6rem 0">
+        <div class="menu-item-info"><div class="name" style="font-size:.9rem">${item.name}</div></div>
+        <div class="menu-item-price" style="font-size:.95rem">€${parseFloat(item.price).toFixed(2)}</div>
         <div class="qty-control">
           <button class="qty-btn" onclick="editQty('${item.id}',-1)">−</button>
           <span class="qty-val" id="eqty-${item.id}">${qty}</span>
@@ -773,226 +306,163 @@ function openEdit(id) {
     }).join('');
   document.getElementById('modal-edit').classList.remove('hidden');
 }
+function editQty(id,delta){const el=document.getElementById('eqty-'+id);el.textContent=Math.max(0,parseInt(el.textContent)+delta);}
 
-function editQty(id, delta) {
-  const el = document.getElementById('eqty-' + id);
-  el.textContent = Math.max(0, parseInt(el.textContent) + delta);
-}
-
-async function saveEdit() {
-  const id = document.getElementById('edit-id').value;
-  const b = allBookings.find(x => x.id === id);
-  const menuItems = configData.menuItems || [];
-  const items = menuItems
-    .map(item => ({ id:item.id, name:item.name, qty:parseInt(document.getElementById('eqty-'+item.id)?.textContent||0), price:item.price }))
-    .filter(i => i.qty > 0);
-  const total = items.reduce((a,i) => a + i.qty * parseFloat(i.price), 0);
-  const updated = {
+async function saveEdit(){
+  const id=document.getElementById('edit-id').value;
+  const b=allBookings.find(x=>x.id===id);
+  const menuItems=configData.menuItems||[];
+  const items=menuItems.map(item=>({id:item.id,name:item.name,qty:parseInt(document.getElementById('eqty-'+item.id)?.textContent||0),price:item.price})).filter(i=>i.qty>0);
+  const total=items.reduce((a,i)=>a+i.qty*parseFloat(i.price),0);
+  const updated={
     ...b,
-    nome: document.getElementById('edit-nome').value.trim(),
-    cognome: document.getElementById('edit-cognome').value.trim(),
-    email: document.getElementById('edit-email').value.trim(),
-    telefono: document.getElementById('edit-telefono').value.trim(),
-    note: document.getElementById('edit-note').value.trim(),
-    notaInterna: document.getElementById('edit-nota-interna').value.trim(),
-    status: document.getElementById('edit-status').value,
-    items, total, updatedAt: new Date().toISOString()
+    nome:document.getElementById('edit-nome').value.trim(),
+    cognome:document.getElementById('edit-cognome').value.trim(),
+    email:document.getElementById('edit-email').value.trim(),
+    telefono:document.getElementById('edit-telefono').value.trim(),
+    note:document.getElementById('edit-note').value.trim(),
+    notaInterna:document.getElementById('edit-nota-interna').value.trim(),
+    status:document.getElementById('edit-status').value,
+    paymentMethod:document.getElementById('edit-payment').value,
+    items, total,
+    updatedAt:new Date().toISOString()
+    // createdAt e id preservati tramite spread di b
   };
-  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify(updated) });
-  closeModal('modal-edit');
-  showToast('✅ Prenotazione aggiornata!');
+  await fetch('/api/update-booking',{method:'POST',headers:authHeaders(),body:JSON.stringify(updated)});
+  closeModal('modal-edit');showToast('✅ Prenotazione aggiornata!');await loadBookings();
+}
+
+async function markPaid(id){
+  if(!confirm('Segna come pagata?'))return;
+  await fetch('/api/update-booking',{method:'POST',headers:authHeaders(),body:JSON.stringify({id,status:'paid'})});
   await loadBookings();
 }
 
-// ============================================================
-// MARK PAID
-// ============================================================
-async function markPaid(id) {
-  if (!confirm('Segna come pagata?')) return;
-  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id, status:'paid'}) });
-  await loadBookings();
-}
-
-// ============================================================
 // DELETE
-// ============================================================
-async function deleteBooking(id) {
-  if (!confirm('Eliminare definitivamente questa prenotazione?')) return;
-  await fetch('/api/delete-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id}) });
+async function deleteBooking(id){
+  if(!confirm('Eliminare definitivamente?'))return;
+  await fetch('/api/delete-booking',{method:'POST',headers:authHeaders(),body:JSON.stringify({id})});
   await loadBookings();
 }
-async function deleteAll() {
-  if (!confirm('⚠️ Eliminare TUTTE le prenotazioni?')) return;
-  if (!confirm('Operazione irreversibile. Continuare?')) return;
-  await fetch('/api/delete-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({deleteAll:true}) });
+async function deleteAll(){
+  if(!confirm('⚠️ Eliminare TUTTE le prenotazioni?'))return;
+  if(!confirm('Operazione irreversibile. Continuare?'))return;
+  await fetch('/api/delete-booking',{method:'POST',headers:authHeaders(),body:JSON.stringify({deleteAll:true})});
   await loadBookings();
 }
 
-// ============================================================
-// RIEPILOGO CUCINA
-// ============================================================
-function showCucina() {
-  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
-  const totals = {};
-  let totalPaxCount = 0;
-  active.forEach(b => {
-    (b.items||[]).forEach(item => {
-      totals[item.name] = (totals[item.name]||0) + (item.qty||1);
-      totalPaxCount += (item.qty||1);
+// CUCINA — include lista d'attesa se ha items
+function showCucina(){
+  const active=allBookings.filter(b=>b.status!=='cancelled');
+  const totals={};let tot=0;
+  active.forEach(b=>{
+    (b.items||[]).forEach(item=>{
+      totals[item.name]=(totals[item.name]||0)+(item.qty||1);
+      tot+=(item.qty||1);
     });
   });
-  const grid = document.getElementById('cucina-grid');
-  grid.innerHTML = Object.entries(totals).map(([name, qty]) =>
-    `<div class="cucina-card"><div class="cval">${qty}</div><div class="clbl">${name}</div></div>`
-  ).join('') || '<p style="color:var(--brown-light)">Nessuna prenotazione attiva.</p>';
-  document.getElementById('cucina-totale').textContent = totalPaxCount;
+  document.getElementById('cucina-grid').innerHTML=
+    Object.entries(totals).map(([n,q])=>`<div class="cucina-card"><div class="cval">${q}</div><div class="clbl">${n}</div></div>`).join('')
+    ||'<p style="color:var(--brown-light)">Nessuna prenotazione.</p>';
+  document.getElementById('cucina-totale').textContent=tot;
   document.getElementById('modal-cucina').classList.remove('hidden');
 }
 
-// ============================================================
-// RICEVUTA PDF (stampa browser)
-// ============================================================
-function printRicevuta(id) {
-  const b = allBookings.find(x => x.id === id);
-  if (!b) return;
-  const statusLabel = { paid:'✅ Pagato', pending_secretariat:'🏛️ In attesa – Segreteria', pending_satispay:'📱 In attesa – Satispay', cancelled:'❌ Annullato' };
-  const metodiLabel = { paypal:'PayPal', satispay:'Satispay', secretariat:'Segreteria parrocchiale' };
-  const itemsHtml = (b.items||[]).map(i =>
-    `<tr><td style="padding:0.4rem 0.5rem">${i.name}</td><td style="padding:0.4rem 0.5rem;text-align:center">${i.qty}</td><td style="padding:0.4rem 0.5rem;text-align:right">€${(i.qty*parseFloat(i.price)).toFixed(2)}</td></tr>`
-  ).join('');
-  const date = b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '–';
-  const el = document.getElementById('ricevuta-print');
-  el.innerHTML = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
-      <img src="${CARTA_B64}" style="width:100%;max-height:120px;object-fit:contain;object-position:left;margin-bottom:1.5rem" />
-      <hr style="border:none;border-top:2px solid #2C1A0E;margin-bottom:1.5rem"/>
-      <h2 style="font-size:1.4rem;margin-bottom:0.25rem;color:#2C1A0E">Ricevuta di prenotazione</h2>
-      <p style="color:#6B3F1F;font-size:0.9rem;margin-bottom:1.5rem">Pranzo in Parrocchia – ${configData.eventDate ? new Date(configData.eventDate).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}) : ''}</p>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem">
-        <tr><td style="padding:0.3rem 0;color:#6B3F1F;width:40%">Numero prenotazione</td><td style="padding:0.3rem 0;font-weight:bold">#${(b.id||'').substring(0,8).toUpperCase()}</td></tr>
-        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Nominativo</td><td style="padding:0.3rem 0;font-weight:bold">${b.nome} ${b.cognome}</td></tr>
-        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Email</td><td style="padding:0.3rem 0">${b.email}</td></tr>
-        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Telefono</td><td style="padding:0.3rem 0">${b.telefono||'–'}</td></tr>
-        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Data prenotazione</td><td style="padding:0.3rem 0">${date}</td></tr>
-        ${b.note ? `<tr><td style="padding:0.3rem 0;color:#6B3F1F">Note</td><td style="padding:0.3rem 0">${b.note}</td></tr>` : ''}
-      </table>
-      <table style="width:100%;border-collapse:collapse;background:#F9F4EC;border-radius:8px;overflow:hidden">
-        <thead><tr style="background:#2C1A0E;color:#F9F4EC">
-          <th style="padding:0.5rem;text-align:left;font-size:0.8rem">Voce</th>
-          <th style="padding:0.5rem;text-align:center;font-size:0.8rem">Qtà</th>
-          <th style="padding:0.5rem;text-align:right;font-size:0.8rem">Importo</th>
-        </tr></thead>
-        <tbody>${itemsHtml}</tbody>
-        <tfoot><tr style="border-top:2px solid #2C1A0E">
-          <td colspan="2" style="padding:0.5rem;font-weight:bold">Totale</td>
-          <td style="padding:0.5rem;text-align:right;font-weight:bold;color:#C8933A">€${(b.total||0).toFixed(2)}</td>
-        </tr></tfoot>
-      </table>
-      <table style="width:100%;margin-top:1rem;border-collapse:collapse">
-        <tr><td style="padding:0.3rem 0;color:#6B3F1F;width:40%">Metodo di pagamento</td><td>${metodiLabel[b.paymentMethod]||b.paymentMethod}</td></tr>
-        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Stato</td><td style="font-weight:bold">${statusLabel[b.status]||b.status}</td></tr>
-      </table>
-      <hr style="border:none;border-top:1px solid #E0D5C5;margin:2rem 0 1rem"/>
-      <p style="font-size:0.8rem;color:#A0622A;text-align:center">Parrocchia San Luigi Gonzaga · Via Tagliamento 10, 20139 Milano</p>
-    </div>`;
-  el.style.display = 'block';
-  setTimeout(() => { window.print(); setTimeout(() => { el.style.display='none'; }, 500); }, 100);
+// RICEVUTA
+function printRicevuta(id){
+  const b=allBookings.find(x=>x.id===id);if(!b)return;
+  const statusLabel={paid:'✅ Pagato',pending_secretariat:'🏛️ In attesa – Segreteria',pending_satispay:'📱 In attesa – Satispay',cancelled:'❌ Annullato'};
+  const metLabel={paypal:'PayPal',satispay:'Satispay',secretariat:'Segreteria parrocchiale'};
+  const itemsHtml=(b.items||[]).map(i=>`<tr><td style="padding:.4rem .5rem">${i.name}</td><td style="padding:.4rem .5rem;text-align:center">${i.qty}</td><td style="padding:.4rem .5rem;text-align:right">€${(i.qty*parseFloat(i.price)).toFixed(2)}</td></tr>`).join('');
+  const date=b.createdAt?new Date(b.createdAt).toLocaleDateString('it-IT'):'–';
+  const eventDate=configData.eventDate?new Date(configData.eventDate).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}):'';
+  const el=document.getElementById('ricevuta-print');
+  el.innerHTML=`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+    <img src="${CARTA_B64}" style="width:100%;max-height:120px;object-fit:contain;object-position:left;margin-bottom:1.5rem"/>
+    <hr style="border:none;border-top:2px solid #2C1A0E;margin-bottom:1.5rem"/>
+    <h2 style="font-size:1.4rem;margin-bottom:.25rem;color:#2C1A0E">Ricevuta di prenotazione</h2>
+    <p style="color:#6B3F1F;font-size:.9rem;margin-bottom:1.5rem">Pranzo in Parrocchia – ${eventDate}</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem">
+      <tr><td style="padding:.3rem 0;color:#6B3F1F;width:40%">N. prenotazione</td><td style="font-weight:bold">#${(b.id||'').substring(0,8).toUpperCase()}</td></tr>
+      <tr><td style="padding:.3rem 0;color:#6B3F1F">Nominativo</td><td style="font-weight:bold">${b.nome} ${b.cognome}</td></tr>
+      <tr><td style="padding:.3rem 0;color:#6B3F1F">Email</td><td>${b.email}</td></tr>
+      <tr><td style="padding:.3rem 0;color:#6B3F1F">Telefono</td><td>${b.telefono||'–'}</td></tr>
+      <tr><td style="padding:.3rem 0;color:#6B3F1F">Data prenotazione</td><td>${date}</td></tr>
+      ${b.note?`<tr><td style="padding:.3rem 0;color:#6B3F1F">Note</td><td>${b.note}</td></tr>`:''}
+    </table>
+    <table style="width:100%;border-collapse:collapse;background:#F9F4EC">
+      <thead><tr style="background:#2C1A0E;color:#F9F4EC">
+        <th style="padding:.5rem;text-align:left;font-size:.8rem">Voce</th>
+        <th style="padding:.5rem;text-align:center;font-size:.8rem">Qtà</th>
+        <th style="padding:.5rem;text-align:right;font-size:.8rem">Importo</th>
+      </tr></thead>
+      <tbody>${itemsHtml}</tbody>
+      <tfoot><tr style="border-top:2px solid #2C1A0E">
+        <td colspan="2" style="padding:.5rem;font-weight:bold">Totale</td>
+        <td style="padding:.5rem;text-align:right;font-weight:bold;color:#C8933A">€${(b.total||0).toFixed(2)}</td>
+      </tr></tfoot>
+    </table>
+    <table style="width:100%;margin-top:1rem;border-collapse:collapse">
+      <tr><td style="padding:.3rem 0;color:#6B3F1F;width:40%">Metodo di pagamento</td><td>${metLabel[b.paymentMethod]||b.paymentMethod||'–'}</td></tr>
+      <tr><td style="padding:.3rem 0;color:#6B3F1F">Stato</td><td style="font-weight:bold">${statusLabel[b.status]||b.status}</td></tr>
+    </table>
+    <hr style="border:none;border-top:1px solid #E0D5C5;margin:2rem 0 1rem"/>
+    <p style="font-size:.8rem;color:#A0622A;text-align:center">Parrocchia San Luigi Gonzaga · Via Tagliamento 10, 20139 Milano</p>
+  </div>`;
+  el.style.display='block';
+  setTimeout(()=>{window.print();setTimeout(()=>{el.style.display='none';},500);},100);
 }
 
-// ============================================================
 // QR CODE
-// ============================================================
-function showQR() {
-  const url = window.location.origin + '/';
-  document.getElementById('qr-url').textContent = url;
-  drawQR(url);
+function showQR(){
+  const url=window.location.origin+'/';
+  document.getElementById('qr-url').textContent=url;
+  const canvas=document.getElementById('qr-canvas');
+  const ctx=canvas.getContext('2d');
+  const img=new Image();img.crossOrigin='anonymous';
+  img.onload=()=>ctx.drawImage(img,0,0,256,256);
+  img.src=`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(url)}`;
   document.getElementById('modal-qr').classList.remove('hidden');
 }
-
-function drawQR(text) {
-  // Simple QR using Google Charts API (image)
-  const canvas = document.getElementById('qr-canvas');
-  const ctx = canvas.getContext('2d');
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => { ctx.drawImage(img, 0, 0, 256, 256); };
-  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(text)}`;
-}
-
-function downloadQR() {
-  const canvas = document.getElementById('qr-canvas');
-  const a = document.createElement('a');
-  a.download = 'qr-prenotazioni.png';
-  a.href = canvas.toDataURL();
-  a.click();
-}
-
-function printQR() {
-  const canvas = document.getElementById('qr-canvas');
-  const url = document.getElementById('qr-url').textContent;
-  const w = window.open('', '_blank');
+function downloadQR(){const a=document.createElement('a');a.download='qr-prenotazioni.png';a.href=document.getElementById('qr-canvas').toDataURL();a.click();}
+function printQR(){
+  const url=document.getElementById('qr-url').textContent;
+  const w=window.open('','_blank');
   w.document.write(`<html><body style="text-align:center;font-family:Arial;padding:2cm">
-    <h2>🍲 Pranzo in Parrocchia</h2>
-    <p>Inquadra il QR code per prenotare</p>
-    <img src="${canvas.toDataURL()}" style="width:200px;height:200px" />
-    <p style="font-size:0.85rem;color:#666">${url}</p>
+    <h2>🍲 Pranzo in Parrocchia</h2><p>Inquadra il QR code per prenotare</p>
+    <img src="${document.getElementById('qr-canvas').toDataURL()}" style="width:200px;height:200px"/>
+    <p style="font-size:.85rem;color:#666">${url}</p>
     <script>window.print();window.close();<\/script>
   </body></html>`);
 }
 
-// ============================================================
 // EXPORT XLSX
-// ============================================================
-function exportXLSX() {
-  const rows = allBookings
-    .filter(b => b.status !== 'cancelled')
-    .map(b => ({
-      'ID': (b.id||'').substring(0,8).toUpperCase(),
-      'Nome': b.nome,
-      'Cognome': b.cognome,
-      'Email': b.email,
-      'Telefono': b.telefono||'',
-      'Ordine': (b.items||[]).map(i => `${i.qty}x ${i.name}`).join(' | '),
-      'Totale €': (b.total||0).toFixed(2),
-      'Pagamento': b.paymentMethod,
-      'Stato': b.status,
-      'Data': b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '',
-      'Note': b.note||'',
-      'Nota interna': b.notaInterna||''
-    }));
-  const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Prenotazioni');
-  // Riepilogo cucina
-  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
-  const totals = {};
-  active.forEach(b => { (b.items||[]).forEach(item => { totals[item.name] = (totals[item.name]||0) + (item.qty||1); }); });
-  const cucinaRows = Object.entries(totals).map(([nome, qty]) => ({'Voce': nome, 'Quantità': qty}));
-  const ws2 = XLSX.utils.json_to_sheet(cucinaRows);
-  XLSX.utils.book_append_sheet(wb, ws2, 'Riepilogo cucina');
-  XLSX.writeFile(wb, `prenotazioni_pranzo_${new Date().toISOString().split('T')[0]}.xlsx`);
+function exportXLSX(){
+  const rows=allBookings.filter(b=>b.status!=='cancelled').map(b=>({
+    'ID':(b.id||'').substring(0,8).toUpperCase(),
+    'Nome':b.nome,'Cognome':b.cognome,'Email':b.email,'Telefono':b.telefono||'',
+    'Ordine':(b.items||[]).map(i=>`${i.qty}x ${i.name}`).join(' | '),
+    'Totale €':(b.total||0).toFixed(2),
+    'Pagamento':b.paymentMethod||'','Stato':b.status,
+    'Data':b.createdAt?new Date(b.createdAt).toLocaleDateString('it-IT'):'',
+    'Note':b.note||'','Nota interna':b.notaInterna||''
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Prenotazioni');
+  const active=allBookings.filter(b=>b.status!=='cancelled');
+  const totals={};
+  active.forEach(b=>(b.items||[]).forEach(i=>{totals[i.name]=(totals[i.name]||0)+(i.qty||1);}));
+  const ws2=XLSX.utils.json_to_sheet(Object.entries(totals).map(([n,q])=>({'Voce':n,'Quantità':q})));
+  XLSX.utils.book_append_sheet(wb,ws2,'Riepilogo cucina');
+  XLSX.writeFile(wb,`prenotazioni_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
-// ============================================================
-// MODAL UTILS
-// ============================================================
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-function showToast(msg) {
-  const t = document.getElementById('save-toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+function showToast(msg){const t=document.getElementById('save-toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-// ============================================================
-// AUTO-LOGIN
-// ============================================================
-const saved = sessionStorage.getItem('adminToken');
-if (saved) {
-  adminToken = saved;
-  document.getElementById('login-overlay').style.display = 'none';
-  loadData();
-}
+const saved=sessionStorage.getItem('adminToken');
+if(saved){adminToken=saved;document.getElementById('login-overlay').style.display='none';loadData();}
 </script>
 </body>
 </html>
