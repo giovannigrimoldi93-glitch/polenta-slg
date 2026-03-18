@@ -6,128 +6,61 @@
   <title>Dashboard – Pranzo in Parrocchia</title>
   <link rel="stylesheet" href="../css/style.css" />
   <style>
-    .admin-nav {
-      background: var(--brown-dark);
-      padding: 0.75rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
+    .admin-nav { background:var(--brown-dark); padding:0.75rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .admin-nav .brand { color:var(--cream); font-family:var(--font-display); font-size:1.1rem; }
+    .admin-nav .nav-links { display:flex; gap:0.5rem; }
+    .admin-nav a { color:rgba(249,244,236,0.75); text-decoration:none; font-size:0.87rem; padding:0.35rem 0.8rem; border-radius:6px; transition:all 0.15s; }
+    .admin-nav a:hover, .admin-nav a.active { background:rgba(255,255,255,0.12); color:var(--cream); }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+    .stat-card { background:var(--warm-white); border:1px solid var(--border); border-radius:12px; padding:1.25rem 1rem; text-align:center; }
+    .stat-card .val { font-family:var(--font-display); font-size:2rem; font-weight:700; color:var(--brown-dark); }
+    .stat-card .lbl { font-size:0.78rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--brown-light); margin-top:0.2rem; }
+    .stat-card.gold .val { color:var(--gold); }
+    .stat-card.green .val { color:var(--green); }
+    .stat-card.red .val { color:var(--red-soft); }
+    .filters { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; align-items:center; }
+    .filter-btn { padding:0.35rem 0.9rem; border-radius:20px; border:1.5px solid var(--border); background:var(--cream); font-size:0.83rem; cursor:pointer; transition:all 0.15s; font-family:var(--font-body); color:var(--brown-mid); }
+    .filter-btn.active { background:var(--brown-dark); color:var(--cream); border-color:var(--brown-dark); }
+    .actions-cell { display:flex; gap:0.35rem; flex-wrap:wrap; }
+    .table-wrap { overflow-x:auto; }
+    .login-overlay { position:fixed; inset:0; background:var(--cream); display:flex; align-items:center; justify-content:center; z-index:999; }
+    .login-box { background:var(--warm-white); border:1px solid var(--border); border-radius:16px; padding:2.5rem 2rem; width:100%; max-width:360px; text-align:center; box-shadow:0 8px 32px var(--shadow-deep); }
+    .login-box h2 { margin-bottom:0.5rem; }
+    .login-box p { color:var(--brown-light); font-size:0.9rem; margin-bottom:1.5rem; }
+    #login-error { color:var(--red-soft); font-size:0.85rem; margin-top:0.5rem; min-height:1.2em; }
+    /* Modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:500; padding:1rem; }
+    .modal-box { background:var(--warm-white); border-radius:16px; padding:2rem; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,0.2); }
+    .modal-box h2 { margin-bottom:1.25rem; font-size:1.3rem; }
+    /* Riepilogo cucina */
+    .cucina-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; }
+    .cucina-item { background:var(--cream); border:1px solid var(--border); border-radius:10px; padding:1rem; text-align:center; }
+    .cucina-item .cval { font-family:var(--font-display); font-size:2.2rem; font-weight:700; color:var(--brown-dark); }
+    .cucina-item .clbl { font-size:0.83rem; color:var(--brown-light); margin-top:0.2rem; }
+    /* Tabs */
+    .tab-bar { display:flex; gap:0; margin-bottom:1.5rem; border-bottom:2px solid var(--border); }
+    .tab-btn { padding:0.6rem 1.2rem; border:none; background:none; cursor:pointer; font-family:var(--font-body); font-size:0.9rem; color:var(--brown-light); border-bottom:3px solid transparent; margin-bottom:-2px; transition:all 0.15s; }
+    .tab-btn.active { color:var(--brown-dark); border-bottom-color:var(--gold); font-weight:600; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    /* QR */
+    #qr-canvas { display:block; margin:1rem auto; border:4px solid var(--border); border-radius:8px; }
+    /* Ricevuta print */
+    @media print {
+      body > *:not(#print-area) { display:none !important; }
+      #print-area { display:block !important; }
     }
-    .admin-nav .brand {
-      color: var(--cream);
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-    }
-    .admin-nav .nav-links {
-      display: flex;
-      gap: 0.5rem;
-    }
-    .admin-nav a {
-      color: rgba(249,244,236,0.75);
-      text-decoration: none;
-      font-size: 0.87rem;
-      padding: 0.35rem 0.8rem;
-      border-radius: 6px;
-      transition: all 0.15s;
-    }
-    .admin-nav a:hover, .admin-nav a.active {
-      background: rgba(255,255,255,0.12);
-      color: var(--cream);
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .stat-card {
-      background: var(--warm-white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem 1rem;
-      text-align: center;
-    }
-    .stat-card .val {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--brown-dark);
-    }
-    .stat-card .lbl {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--brown-light);
-      margin-top: 0.2rem;
-    }
-    .stat-card.gold .val { color: var(--gold); }
-    .stat-card.green .val { color: var(--green); }
-    .stat-card.red .val { color: var(--red-soft); }
-    .filters {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-      align-items: center;
-    }
-    .filter-btn {
-      padding: 0.35rem 0.9rem;
-      border-radius: 20px;
-      border: 1.5px solid var(--border);
-      background: var(--cream);
-      font-size: 0.83rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-family: var(--font-body);
-      color: var(--brown-mid);
-    }
-    .filter-btn.active {
-      background: var(--brown-dark);
-      color: var(--cream);
-      border-color: var(--brown-dark);
-    }
-    .actions-cell {
-      display: flex;
-      gap: 0.35rem;
-      flex-wrap: wrap;
-    }
-    .table-wrap { overflow-x: auto; }
-    .login-overlay {
-      position: fixed; inset: 0;
-      background: var(--cream);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-    .login-box {
-      background: var(--warm-white);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 360px;
-      text-align: center;
-      box-shadow: 0 8px 32px var(--shadow-deep);
-    }
-    .login-box h2 { margin-bottom: 0.5rem; }
-    .login-box p { color: var(--brown-light); font-size: 0.9rem; margin-bottom: 1.5rem; }
-    #login-error { color: var(--red-soft); font-size: 0.85rem; margin-top: 0.5rem; min-height: 1.2em; }
+    #print-area { display:none; }
   </style>
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
     <div style="font-size:2.5rem;margin-bottom:0.5rem">🔐</div>
     <h2>Area Admin</h2>
     <p>Inserisci la password per accedere</p>
-    <div class="form-group">
-      <input type="password" id="pwd-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" />
-    </div>
+    <div class="form-group"><input type="password" id="pwd-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
     <button class="btn btn-primary" onclick="doLogin()">Accedi</button>
     <div id="login-error"></div>
   </div>
@@ -138,69 +71,130 @@
   <div class="nav-links">
     <a href="index.html" class="active">📋 Prenotazioni</a>
     <a href="impostazioni.html">⚙️ Impostazioni</a>
-    <a href="/" target="_blank">🌐 Sito pubblico</a>
+    <a href="/" target="_blank">🌐 Sito</a>
     <a href="#" onclick="logout()">Esci</a>
   </div>
 </nav>
 
-<div class="container" style="max-width:1100px">
+<div class="container" style="max-width:1200px">
 
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem">
-    <h1 style="font-size:1.6rem">Prenotazioni</h1>
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-      <button class="btn btn-outline btn-sm" onclick="loadBookings()">🔄 Aggiorna</button>
-      <button class="btn btn-gold btn-sm" onclick="exportCSV()">⬇️ Esporta CSV</button>
-      <button class="btn btn-danger btn-sm" onclick="deleteAll()">🗑️ Elimina tutti</button>
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('prenotazioni',this)">📋 Prenotazioni</button>
+    <button class="tab-btn" onclick="switchTab('cucina',this)">👨‍🍳 Riepilogo cucina</button>
+    <button class="tab-btn" onclick="switchTab('qr',this)">📱 QR Code</button>
+  </div>
+
+  <!-- TAB: PRENOTAZIONI -->
+  <div id="tab-prenotazioni" class="tab-content active">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem">
+      <h1 style="font-size:1.4rem">Prenotazioni</h1>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="loadBookings()">🔄 Aggiorna</button>
+        <button class="btn btn-gold btn-sm" onclick="exportCSV()">⬇️ CSV</button>
+        <button class="btn btn-gold btn-sm" onclick="exportXLSX()">⬇️ XLSX</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAll()">🗑️ Elimina tutti</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="val" id="stat-total">–</div><div class="lbl">Prenotazioni</div></div>
+      <div class="stat-card green"><div class="val" id="stat-pax">–</div><div class="lbl">Persone</div></div>
+      <div class="stat-card gold"><div class="val" id="stat-incasso">–</div><div class="lbl">Incasso confermato</div></div>
+      <div class="stat-card"><div class="val" id="stat-posti">–</div><div class="lbl">Posti rimasti</div></div>
+      <div class="stat-card red"><div class="val" id="stat-pending">–</div><div class="lbl">In attesa</div></div>
+      <div class="stat-card"><div class="val" id="stat-waitlist">–</div><div class="lbl">Lista d'attesa</div></div>
+    </div>
+
+    <div class="filters">
+      <span style="font-size:0.83rem;color:var(--brown-light)">Filtra:</span>
+      <button class="filter-btn active" onclick="setFilter('all',this)">Tutti</button>
+      <button class="filter-btn" onclick="setFilter('paid',this)">✅ Pagati</button>
+      <button class="filter-btn" onclick="setFilter('pending_secretariat',this)">🏛️ Segreteria</button>
+      <button class="filter-btn" onclick="setFilter('pending_satispay',this)">📱 Satispay</button>
+      <button class="filter-btn" onclick="setFilter('cancelled',this)">❌ Annullati</button>
+      <button class="filter-btn" onclick="setFilter('waitlist',this)">📋 Attesa</button>
+      <input type="text" id="search-input" placeholder="🔍 Cerca nome o email..." oninput="renderTable()"
+        style="margin-left:auto;padding:0.35rem 0.8rem;border:1.5px solid var(--border);border-radius:20px;font-size:0.85rem;font-family:var(--font-body);background:var(--cream);outline:none;width:200px" />
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Nome</th><th>Email</th><th>Tel</th><th>Ordine</th><th>Totale</th><th>Pagamento</th><th>Stato</th><th>Data</th><th>Nota</th><th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-tbody">
+            <tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--brown-light)">Caricamento...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-grid" id="stats-grid">
-    <div class="stat-card"><div class="val" id="stat-total">–</div><div class="lbl">Prenotazioni totali</div></div>
-    <div class="stat-card green"><div class="val" id="stat-pax">–</div><div class="lbl">Persone totali</div></div>
-    <div class="stat-card gold"><div class="val" id="stat-incasso">–</div><div class="lbl">Incasso confermato</div></div>
-    <div class="stat-card"><div class="val" id="stat-posti">–</div><div class="lbl">Posti rimasti</div></div>
-    <div class="stat-card red"><div class="val" id="stat-pending">–</div><div class="lbl">In attesa pagamento</div></div>
+  <!-- TAB: CUCINA -->
+  <div id="tab-cucina" class="tab-content">
+    <h1 style="font-size:1.4rem;margin-bottom:1.25rem">👨‍🍳 Riepilogo per la cucina</h1>
+    <div class="card">
+      <div class="card-title"><span class="icon">🍽️</span> Totale per voce di menù</div>
+      <div class="cucina-grid" id="cucina-grid">
+        <div style="color:var(--brown-light);padding:1rem">Caricamento...</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <div class="card-title"><span class="icon">💰</span> Solo prenotazioni confermate (pagate)</div>
+      <div class="cucina-grid" id="cucina-grid-paid">
+        <div style="color:var(--brown-light);padding:1rem">Caricamento...</div>
+      </div>
+    </div>
   </div>
 
-  <!-- FILTERS -->
-  <div class="filters">
-    <span style="font-size:0.83rem;color:var(--brown-light)">Filtra:</span>
-    <button class="filter-btn active" onclick="setFilter('all', this)">Tutti</button>
-    <button class="filter-btn" onclick="setFilter('paid', this)">✅ Pagati</button>
-    <button class="filter-btn" onclick="setFilter('pending_secretariat', this)">🏛️ Segreteria</button>
-    <button class="filter-btn" onclick="setFilter('pending_satispay', this)">📱 Satispay</button>
-    <button class="filter-btn" onclick="setFilter('cancelled', this)">❌ Annullati</button>
-    <input type="text" id="search-input" placeholder="🔍 Cerca nome o email..." oninput="renderTable()"
-      style="margin-left:auto;padding:0.35rem 0.8rem;border:1.5px solid var(--border);border-radius:20px;font-size:0.85rem;font-family:var(--font-body);background:var(--cream);outline:none;width:200px" />
-  </div>
-
-  <!-- TABLE -->
-  <div class="card" style="padding:0;overflow:hidden">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Tel</th>
-            <th>Ordine</th>
-            <th>Totale</th>
-            <th>Pagamento</th>
-            <th>Stato</th>
-            <th>Data</th>
-            <th>Azioni</th>
-          </tr>
-        </thead>
-        <tbody id="bookings-tbody">
-          <tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--brown-light)">Caricamento...</td></tr>
-        </tbody>
-      </table>
+  <!-- TAB: QR CODE -->
+  <div id="tab-qr" class="tab-content">
+    <h1 style="font-size:1.4rem;margin-bottom:1.25rem">📱 QR Code prenotazione</h1>
+    <div class="card" style="text-align:center;max-width:400px;margin:0 auto">
+      <div class="card-title" style="justify-content:center"><span class="icon">📱</span> QR Code per la bacheca</div>
+      <p style="font-size:0.9rem;color:var(--brown-light);margin-bottom:1rem">Stampa e affiggi questo QR code in chiesa o in bacheca.</p>
+      <canvas id="qr-canvas" width="250" height="250"></canvas>
+      <div style="font-size:0.8rem;color:var(--brown-light);margin:0.75rem 0" id="qr-url"></div>
+      <button class="btn btn-primary" onclick="printQR()" style="margin-top:0.5rem">🖨️ Stampa QR Code</button>
     </div>
   </div>
 
 </div>
+
+<!-- MODAL MODIFICA -->
+<div class="modal-overlay hidden" id="edit-modal">
+  <div class="modal-box">
+    <h2>✏️ Modifica prenotazione</h2>
+    <input type="hidden" id="edit-id" />
+    <div class="form-row">
+      <div class="form-group"><label>Nome</label><input type="text" id="edit-nome" /></div>
+      <div class="form-group"><label>Cognome</label><input type="text" id="edit-cognome" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Email</label><input type="email" id="edit-email" /></div>
+      <div class="form-group"><label>Telefono</label><input type="tel" id="edit-telefono" /></div>
+    </div>
+    <div class="form-group"><label>Note cliente</label><input type="text" id="edit-note" /></div>
+    <div class="form-group"><label>🔒 Nota interna admin</label><input type="text" id="edit-nota-admin" placeholder="Visibile solo agli admin" /></div>
+    <div id="edit-items-container" style="margin:1rem 0"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem">
+      <strong>Totale: <span id="edit-total" style="color:var(--gold)">€0.00</span></strong>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:1.25rem">
+      <button class="btn btn-primary" onclick="saveEdit()">💾 Salva</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- AREA STAMPA RICEVUTA -->
+<div id="print-area"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
 let allBookings = [];
@@ -213,40 +207,36 @@ let configData = {};
 // ============================================================
 function doLogin() {
   const pwd = document.getElementById('pwd-input').value;
-  fetch('/api/admin-login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pwd })
-  }).then(r => r.json()).then(data => {
-    if (data.token) {
-      adminToken = data.token;
-      sessionStorage.setItem('adminToken', adminToken);
-      document.getElementById('login-overlay').style.display = 'none';
-      loadData();
-    } else {
-      document.getElementById('login-error').textContent = 'Password errata.';
-    }
-  }).catch(() => {
-    document.getElementById('login-error').textContent = 'Errore di connessione.';
-  });
+  fetch('/api/admin-login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pwd}) })
+    .then(r=>r.json()).then(data => {
+      if (data.token) {
+        adminToken = data.token;
+        sessionStorage.setItem('adminToken', adminToken);
+        document.getElementById('login-overlay').style.display = 'none';
+        loadData();
+      } else { document.getElementById('login-error').textContent = 'Password errata.'; }
+    }).catch(() => { document.getElementById('login-error').textContent = 'Errore di connessione.'; });
 }
+function logout() { sessionStorage.removeItem('adminToken'); location.reload(); }
+function authHeaders() { return { 'Content-Type':'application/json', 'Authorization':'Bearer '+adminToken }; }
 
-function logout() {
-  sessionStorage.removeItem('adminToken');
-  location.reload();
-}
-
-function authHeaders() {
-  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken };
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'cucina') renderCucina();
+  if (name === 'qr') renderQR();
 }
 
 // ============================================================
-// INIT
+// LOAD DATA
 // ============================================================
 async function loadData() {
-  const [cfgRes] = await Promise.all([
-    fetch('/api/get-config', { headers: authHeaders() })
-  ]);
+  const cfgRes = await fetch('/api/get-config', { headers: authHeaders() });
   configData = await cfgRes.json();
   await loadBookings();
 }
@@ -257,33 +247,444 @@ async function loadBookings() {
     allBookings = await res.json();
     updateStats();
     renderTable();
-  } catch(e) {
-    console.error(e);
-  }
+  } catch(e) { console.error(e); }
 }
 
 // ============================================================
 // STATS
 // ============================================================
 function updateStats() {
-  const active = allBookings.filter(b => b.status !== 'cancelled');
+  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
   const paid = allBookings.filter(b => b.status === 'paid');
-  const pending = allBookings.filter(b => b.status !== 'paid' && b.status !== 'cancelled');
-  const pax = active.reduce((a, b) => a + totalPax(b), 0);
-  const incasso = paid.reduce((a, b) => a + (b.total || 0), 0);
-  const maxSeats = configData.maxSeats || 320;
+  const pending = allBookings.filter(b => b.status !== 'paid' && b.status !== 'cancelled' && b.status !== 'waitlist');
+  const waitlist = allBookings.filter(b => b.status === 'waitlist');
+  const pax = active.reduce((a,b) => a + totalPax(b), 0);
+  const incasso = paid.reduce((a,b) => a + (b.total||0), 0);
+  document.getElementById('stat-total').textContent = active.length;
+  document.getElementById('stat-pax').textContent = pax;
+  document.getElementById('stat-incasso').textContent = '€'+incasso.toFixed(0);
+  document.getElementById('stat-posti').textContent = Math.max(0, (configData.maxSeats||320) - pax);
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-waitlist').textContent = waitlist.length;
+}
+function totalPax(b) { if (!b.items || !b.items.length) return 0; return b.items.reduce((a,i) => a+(i.qty||1), 0); }
 
+// ============================================================
+// TABLE
+// ============================================================
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const search = (document.getElementById('search-input').value||'').toLowerCase();
+  let rows = allBookings.filter(b => {
+    if (currentFilter !== 'all' && b.status !== currentFilter) return false;
+    if (search) { const hay = `${b.nome} ${b.cognome} ${b.email}`.toLowerCase(); if (!hay.includes(search)) return false; }
+    return true;
+  });
+  const tbody = document.getElementById('bookings-tbody');
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--brown-light)">Nessuna prenotazione trovata.</td></tr>'; return; }
+  const statusMap = { paid:'<span class="badge badge-paid">✅ Pagato</span>', pending_satispay:'<span class="badge badge-pending">📱 Satispay</span>', pending_secretariat:'<span class="badge badge-secretariat">🏛️ Segreteria</span>', cancelled:'<span class="badge badge-cancelled">❌ Annullato</span>', waitlist:'<span class="badge badge-pending">📋 Attesa</span>' };
+  const payMap = { paypal:'PayPal', satispay:'Satispay', secretariat:'Segreteria', waitlist:'–' };
+  tbody.innerHTML = rows.map(b => {
+    const itemsStr = (b.items||[]).map(it => `${it.qty}× ${it.name}`).join(', ') || '–';
+    const date = b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '–';
+    const shortId = (b.id||'').substring(0,8).toUpperCase();
+    return `<tr>
+      <td><code style="font-size:0.75rem">${shortId}</code></td>
+      <td><strong>${b.nome} ${b.cognome}</strong></td>
+      <td style="font-size:0.83rem">${b.email}</td>
+      <td style="font-size:0.83rem">${b.telefono||'–'}</td>
+      <td style="font-size:0.82rem;max-width:180px">${itemsStr}</td>
+      <td><strong>€${(b.total||0).toFixed(2)}</strong></td>
+      <td style="font-size:0.83rem">${payMap[b.paymentMethod]||b.paymentMethod}</td>
+      <td>${statusMap[b.status]||b.status}</td>
+      <td style="font-size:0.82rem">${date}</td>
+      <td style="font-size:0.82rem;max-width:120px;color:var(--brown-light)">${b.notaAdmin||'–'}</td>
+      <td>
+        <div class="actions-cell">
+          ${b.status !== 'paid' && b.status !== 'cancelled' && b.status !== 'waitlist' ? `<button class="btn btn-sm btn-gold" onclick="markPaid('${b.id}')">✅</button>` : ''}
+          <button class="btn btn-sm btn-outline" onclick="openEditModal('${b.id}')" title="Modifica">✏️</button>
+          <button class="btn btn-sm btn-outline" onclick="printRicevuta('${b.id}')" title="Ricevuta">🖨️</button>
+          ${b.status !== 'cancelled' ? `<button class="btn btn-sm btn-danger" onclick="cancelBooking('${b.id}')" title="Annulla">✕</button>` : ''}
+          <button class="btn btn-sm btn-outline" onclick="deleteBooking('${b.id}')" style="color:var(--red-soft)" title="Elimina">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+async function markPaid(id) {
+  if (!confirm('Segna come pagata?')) return;
+  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id,status:'paid'}) });
+  await loadBookings();
+}
+async function cancelBooking(id) {
+  if (!confirm('Annullare questa prenotazione?')) return;
+  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id,status:'cancelled'}) });
+  await loadBookings();
+}
+async function deleteBooking(id) {
+  if (!confirm('Eliminare definitivamente? Operazione irreversibile.')) return;
+  await fetch('/api/delete-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id}) });
+  await loadBookings();
+}
+async function deleteAll() {
+  if (!confirm('⚠️ Eliminare TUTTE le prenotazioni?')) return;
+  if (!confirm('Sei sicuro? Operazione irreversibile!')) return;
+  await fetch('/api/delete-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({deleteAll:true}) });
+  await loadBookings();
+}
+
+// ============================================================
+// EDIT MODAL
+// ============================================================
+let editMenuItems = [];
+let editQty = {};
+
+function openEditModal(id) {
+  const b = allBookings.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-nome').value = b.nome;
+  document.getElementById('edit-cognome').value = b.cognome;
+  document.getElementById('edit-email').value = b.email;
+  document.getElementById('edit-telefono').value = b.telefono||'';
+  document.getElementById('edit-note').value = b.note||'';
+  document.getElementById('edit-nota-admin').value = b.notaAdmin||'';
+
+  editMenuItems = configData.menuItems || [];
+  editQty = {};
+  editMenuItems.forEach(item => { editQty[item.id] = 0; });
+  (b.items||[]).forEach(it => { editQty[it.id] = it.qty; });
+
+  renderEditItems();
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function renderEditItems() {
+  const c = document.getElementById('edit-items-container');
+  c.innerHTML = '<div class="card-title" style="font-size:0.9rem;margin-bottom:0.75rem"><span class="icon">🍽️</span> Ordine</div>' +
+    editMenuItems.map(item => `
+      <div class="menu-item">
+        <div class="menu-item-info"><div class="name">${item.name}</div></div>
+        <div class="menu-item-price">€${parseFloat(item.price).toFixed(2)}</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="editChangeQty('${item.id}',-1)">−</button>
+          <span class="qty-val" id="eqty-${item.id}">${editQty[item.id]||0}</span>
+          <button class="qty-btn" onclick="editChangeQty('${item.id}',+1)">+</button>
+        </div>
+      </div>`).join('');
+  updateEditTotal();
+}
+
+function editChangeQty(id, delta) {
+  editQty[id] = Math.max(0, (editQty[id]||0) + delta);
+  document.getElementById('eqty-'+id).textContent = editQty[id];
+  updateEditTotal();
+}
+function updateEditTotal() {
+  const total = editMenuItems.reduce((a,item) => a + (editQty[item.id]||0) * parseFloat(item.price), 0);
+  document.getElementById('edit-total').textContent = '€'+total.toFixed(2);
+}
+function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+async function saveEdit() {
+  const id = document.getElementById('edit-id').value;
+  const items = editMenuItems.filter(item => (editQty[item.id]||0) > 0).map(item => ({ id:item.id, name:item.name, qty:editQty[item.id], price:item.price }));
+  const total = editMenuItems.reduce((a,item) => a + (editQty[item.id]||0) * parseFloat(item.price), 0);
+  const updates = {
+    id,
+    nome: document.getElementById('edit-nome').value.trim(),
+    cognome: document.getElementById('edit-cognome').value.trim(),
+    email: document.getElementById('edit-email').value.trim(),
+    telefono: document.getElementById('edit-telefono').value.trim(),
+    note: document.getElementById('edit-note').value.trim(),
+    notaAdmin: document.getElementById('edit-nota-admin').value.trim(),
+    items, total
+  };
+  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify(updates) });
+  closeEditModal();
+  await loadBookings();
+}
+
+// ============================================================
+// RICEVUTA PDF (stampa browser)
+// ============================================================
+function printRicevuta(id) {
+  const b = allBookings.find(x => x.id === id);
+  if (!b) return;
+  const metodiLabel = { paypal:'PayPal', satispay:'Satispay', secretariat:'Segreteria parrocchiale' };
+  const statiLabel = { paid:'Pagato ✅', pending_satispay:'In attesa (Satispay)', pending_secretariat:'In attesa (Segreteria)', cancelled:'Annullato' };
+  const itemsHtml = (b.items||[]).map(i => `<tr><td>${i.name}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right">€${(i.qty*parseFloat(i.price)).toFixed(2)}</td></tr>`).join('');
+  const date = b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '–';
+
+  const printArea = document.getElementById('print-area');
+  printArea.innerHTML = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:2rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #2C1A0E;padding-bottom:1rem;margin-bottom:1.5rem">
+        <div>
+          <div style="font-size:1.3rem;font-weight:700;color:#2C1A0E">Parrocchia San Luigi Gonzaga</div>
+          <div style="font-size:0.85rem;color:#666;margin-top:0.25rem">Via Tagliamento 10, 20139 Milano</div>
+          <div style="font-size:0.85rem;color:#666">Tel 02/35991032 · sanluigi@chiesadimilano.it</div>
+          <div style="font-size:0.85rem;color:#666">CF: 97050190152</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.1em">Ricevuta</div>
+          <div style="font-size:1.1rem;font-weight:700;color:#2C1A0E">#${(b.id||'').substring(0,8).toUpperCase()}</div>
+          <div style="font-size:0.85rem;color:#666">${date}</div>
+        </div>
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <div style="font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">Intestata a</div>
+        <div style="font-size:1.1rem;font-weight:700">${b.nome} ${b.cognome}</div>
+        <div style="font-size:0.9rem;color:#666">${b.email}${b.telefono ? ' · '+b.telefono : ''}</div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="font-size:0.8rem;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem">Dettaglio ordine</div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr style="background:#2C1A0E;color:white">
+              <th style="padding:0.5rem 0.75rem;text-align:left;font-size:0.8rem">Voce</th>
+              <th style="padding:0.5rem 0.75rem;text-align:center;font-size:0.8rem">Qtà</th>
+              <th style="padding:0.5rem 0.75rem;text-align:right;font-size:0.8rem">Importo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+          <tfoot>
+            <tr style="border-top:2px solid #2C1A0E">
+              <td colspan="2" style="padding:0.6rem 0.75rem;font-weight:700">Totale</td>
+              <td style="padding:0.6rem 0.75rem;text-align:right;font-weight:700;font-size:1.1rem">€${(b.total||0).toFixed(2)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div style="display:flex;gap:2rem;font-size:0.85rem;color:#666;margin-top:1rem">
+        <div><strong>Metodo:</strong> ${metodiLabel[b.paymentMethod]||b.paymentMethod}</div>
+        <div><strong>Stato:</strong> ${statiLabel[b.status]||b.status}</div>
+      </div>
+      ${b.note ? `<div style="margin-top:0.75rem;font-size:0.85rem;color:#666"><strong>Note:</strong> ${b.note}</div>` : ''}
+      <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid #eee;text-align:center;font-size:0.8rem;color:#999">
+        Pranzo in Parrocchia · Parrocchia San Luigi Gonzaga Milano
+      </div>
+    </div>`;
+  window.print();
+}
+
+// ============================================================
+// CUCINA
+// ============================================================
+function renderCucina() {
+  const menuItems = configData.menuItems || [];
+  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
+  const paid = allBookings.filter(b => b.status === 'paid');
+  [['cucina-grid', active], ['cucina-grid-paid', paid]].forEach(([gridId, bookings]) => {
+    const totals = {};
+    menuItems.forEach(item => { totals[item.id] = { name: item.name, qty: 0 }; });
+    bookings.forEach(b => (b.items||[]).forEach(i => { if (totals[i.id]) totals[i.id].qty += i.qty||1; }));
+    const grid = document.getElementById(gridId);
+    const items = Object.values(totals);
+    if (!items.length) { grid.innerHTML = '<div style="color:var(--brown-light)">Nessun dato.</div>'; return; }
+    grid.innerHTML = items.map(i => `
+      <div class="cucina-item">
+        <div class="cval">${i.qty}</div>
+        <div class="clbl">${i.name}</div>
+      </div>`).join('') + `<div class="cucina-item" style="border-color:var(--gold)">
+        <div class="cval" style="color:var(--gold)">${bookings.filter(b=>b.status!=='cancelled'&&b.status!=='waitlist').reduce((a,b)=>a+totalPax(b),0)}</div>
+        <div class="clbl">Persone totali</div>
+      </div>`;
+  });
+}
+
+// ============================================================
+// QR CODE
+// ============================================================
+function renderQR() {
+  const url = window.location.origin + '/';
+  document.getElementById('qr-url').textContent = url;
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const size = 250;
+  // Simple QR placeholder — use qrcode.js for real QR
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,size,size);
+  ctx.fillStyle = '#2C1A0E';
+  ctx.font = 'bold 14px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('QR Code', size/2, size/2 - 20);
+  ctx.font = '11px Arial';
+  ctx.fillStyle = '#666';
+  const words = url.split('/');
+  ctx.fillText(url, size/2, size/2 + 10);
+  ctx.fillText('Carico libreria QR...', size/2, size/2 + 30);
+
+  // Load QRCode library and generate
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  script.onload = () => {
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0,0,size,size);
+    const div = document.createElement('div');
+    new QRCode(div, { text: url, width: size, height: size, colorDark:'#2C1A0E', colorLight:'#ffffff' });
+    setTimeout(() => {
+      const img = div.querySelector('img');
+      if (img) { const i = new Image(); i.onload = () => ctx.drawImage(i,0,0,size,size); i.src = img.src; }
+      else {
+        const c = div.querySelector('canvas');
+        if (c) ctx.drawImage(c,0,0,size,size);
+      }
+    }, 300);
+  };
+  if (!window.QRCode) document.head.appendChild(script);
+  else { script.onload(); }
+}
+
+function printQR() {
+  const canvas = document.getElementById('qr-canvas');
+  const url = document.getElementById('qr-url').textContent;
+  const w = window.open('','_blank');
+  w.document.write(`<html><body style="text-align:center;font-family:Arial,sans-serif;padding:2rem">
+    <h2>Parrocchia San Luigi Gonzaga</h2>
+    <h3>🍲 Prenota il Pranzo in Parrocchia</h3>
+    <img src="${canvas.toDataURL()}" style="width:250px;height:250px;border:4px solid #2C1A0E;border-radius:8px" />
+    <p style="font-size:1rem;margin-top:1rem">${url}</p>
+    <p style="font-size:0.85rem;color:#666">Inquadra il QR code con il tuo smartphone per prenotare</p>
+    <script>window.print()<\/script>
+  </body></html>`);
+}
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportCSV() {
+  const header = ['ID','Nome','Cognome','Email','Telefono','Ordine','Totale','Pagamento','Stato','Data','Note','Nota Admin'];
+  const rows = allBookings.map(b => [
+    (b.id||'').substring(0,8).toUpperCase(), b.nome, b.cognome, b.email, b.telefono||'',
+    (b.items||[]).map(i=>`${i.qty}x ${i.name}`).join(' | '),
+    (b.total||0).toFixed(2), b.paymentMethod, b.status,
+    b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '', b.note||'', b.notaAdmin||''
+  ]);
+  const csv = [header,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download = `prenotazioni_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+// ============================================================
+// EXPORT XLSX
+// ============================================================
+function exportXLSX() {
+  const menuItems = configData.menuItems || [];
+  const wb = XLSX.utils.book_new();
+
+  // Foglio 1: Prenotazioni
+  const header = ['ID','Nome','Cognome','Email','Telefono','Ordine','Totale €','Pagamento','Stato','Data','Note','Nota Admin'];
+  const rows = allBookings.filter(b=>b.status!=='waitlist').map(b => [
+    (b.id||'').substring(0,8).toUpperCase(), b.nome, b.cognome, b.email, b.telefono||'',
+    (b.items||[]).map(i=>`${i.qty}x ${i.name}`).join(' | '),
+    parseFloat((b.total||0).toFixed(2)),
+    {paypal:'PayPal',satispay:'Satispay',secretariat:'Segreteria'}[b.paymentMethod]||b.paymentMethod,
+    {paid:'Pagato',pending_satispay:'In attesa Satispay',pending_secretariat:'In attesa Segreteria',cancelled:'Annullato'}[b.status]||b.status,
+    b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '', b.note||'', b.notaAdmin||''
+  ]);
+  const ws1 = XLSX.utils.aoa_to_sheet([header,...rows]);
+  ws1['!cols'] = [8,12,12,24,14,30,10,12,18,12,20,20].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws1, 'Prenotazioni');
+
+  // Foglio 2: Riepilogo cucina
+  const active = allBookings.filter(b=>b.status!=='cancelled'&&b.status!=='waitlist');
+  const totals = {};
+  menuItems.forEach(item => { totals[item.id] = { name:item.name, qty:0, qtyPaid:0 }; });
+  active.forEach(b => (b.items||[]).forEach(i => { if(totals[i.id]) { totals[i.id].qty += i.qty||1; if(b.status==='paid') totals[i.id].qtyPaid += i.qty||1; } }));
+  const cucinaRows = [['Voce','Totale prenotati','Di cui pagati'], ...Object.values(totals).map(i=>[i.name,i.qty,i.qtyPaid])];
+  const ws2 = XLSX.utils.aoa_to_sheet(cucinaRows);
+  ws2['!cols'] = [{wch:25},{wch:18},{wch:15}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Riepilogo cucina');
+
+  XLSX.writeFile(wb, `prenotazioni_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+// ============================================================
+// AUTO-LOGIN
+// ============================================================
+const saved = sessionStorage.getItem('adminToken');
+if (saved) { adminToken = saved; document.getElementById('login-overlay').style.display = 'none'; loadData(); }
+</script>
+</body>
+</html>
+
+// ============================================================
+// STATE
+// ============================================================
+let allBookings = [];
+let currentFilter = 'all';
+let adminToken = '';
+let configData = {};
+
+// ============================================================
+// LOGIN
+// ============================================================
+function doLogin() {
+  const pwd = document.getElementById('pwd-input').value;
+  fetch('/api/admin-login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pwd}) })
+    .then(r=>r.json()).then(data => {
+      if (data.token) {
+        adminToken = data.token;
+        sessionStorage.setItem('adminToken', adminToken);
+        document.getElementById('login-overlay').style.display = 'none';
+        loadData();
+      } else { document.getElementById('login-error').textContent = 'Password errata.'; }
+    }).catch(() => { document.getElementById('login-error').textContent = 'Errore di connessione.'; });
+}
+function logout() { sessionStorage.removeItem('adminToken'); location.reload(); }
+function authHeaders() { return {'Content-Type':'application/json','Authorization':'Bearer '+adminToken}; }
+
+// ============================================================
+// LOAD
+// ============================================================
+async function loadData() {
+  const cfgRes = await fetch('/api/get-config', { headers: authHeaders() });
+  configData = await cfgRes.json();
+  await loadBookings();
+}
+async function loadBookings() {
+  try {
+    const res = await fetch('/api/get-prenotazioni', { headers: authHeaders() });
+    allBookings = await res.json();
+    updateStats();
+    renderTable();
+  } catch(e) { console.error(e); }
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
+  const paid = allBookings.filter(b => b.status === 'paid');
+  const pending = allBookings.filter(b => b.status !== 'paid' && b.status !== 'cancelled' && b.status !== 'waitlist');
+  const waitlist = allBookings.filter(b => b.status === 'waitlist');
+  const pax = active.reduce((a,b) => a + totalPax(b), 0);
+  const incasso = paid.reduce((a,b) => a + (b.total||0), 0);
+  const maxSeats = configData.maxSeats || 320;
   document.getElementById('stat-total').textContent = active.length;
   document.getElementById('stat-pax').textContent = pax;
   document.getElementById('stat-incasso').textContent = '€' + incasso.toFixed(0);
   document.getElementById('stat-posti').textContent = Math.max(0, maxSeats - pax);
   document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-waitlist').textContent = waitlist.length;
 }
-
-function totalPax(b) {
-  if (!b.items) return 1;
-  return b.items.reduce((a, i) => a + (i.qty || 1), 0);
-}
+function totalPax(b) { if (!b.items || !b.items.length) return 0; return b.items.reduce((a,i) => a+(i.qty||1), 0); }
 
 // ============================================================
 // FILTER + TABLE
@@ -299,46 +700,40 @@ function renderTable() {
   const search = (document.getElementById('search-input').value || '').toLowerCase();
   let rows = allBookings.filter(b => {
     if (currentFilter !== 'all' && b.status !== currentFilter) return false;
-    if (search) {
-      const hay = `${b.nome} ${b.cognome} ${b.email}`.toLowerCase();
-      if (!hay.includes(search)) return false;
-    }
+    if (search) { const hay = `${b.nome} ${b.cognome} ${b.email}`.toLowerCase(); if (!hay.includes(search)) return false; }
     return true;
   });
-
   const tbody = document.getElementById('bookings-tbody');
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--brown-light)">Nessuna prenotazione trovata.</td></tr>';
-    return;
-  }
-
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--brown-light)">Nessuna prenotazione trovata.</td></tr>'; return; }
   const statusMap = {
     paid: '<span class="badge badge-paid">✅ Pagato</span>',
     pending_satispay: '<span class="badge badge-pending">📱 Satispay</span>',
     pending_secretariat: '<span class="badge badge-secretariat">🏛️ Segreteria</span>',
-    cancelled: '<span class="badge badge-cancelled">❌ Annullato</span>'
+    cancelled: '<span class="badge badge-cancelled">❌ Annullato</span>',
+    waitlist: '<span class="badge" style="background:#EDE9FE;color:#5B21B6">⏳ Attesa</span>'
   };
-  const payMap = { paypal: 'PayPal', satispay: 'Satispay', secretariat: 'Segreteria' };
-
-  tbody.innerHTML = rows.map((b, i) => {
-    const itemsStr = (b.items || []).map(it => `${it.qty}× ${it.name}`).join(', ') || '–';
+  const payMap = { paypal:'PayPal', satispay:'Satispay', secretariat:'Segreteria', waitlist:'–' };
+  tbody.innerHTML = rows.map(b => {
+    const itemsStr = (b.items||[]).map(it => `${it.qty}× ${it.name}`).join(', ') || '–';
     const date = b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '–';
-    const shortId = (b.id || '').substring(0, 8).toUpperCase();
+    const shortId = (b.id||'').substring(0,8).toUpperCase();
+    const notaInterna = b.notaInterna ? `<br><span style="font-size:0.75rem;color:var(--gold)">📝 ${b.notaInterna}</span>` : '';
     return `<tr>
       <td><code style="font-size:0.75rem">${shortId}</code></td>
-      <td><strong>${b.nome} ${b.cognome}</strong></td>
+      <td><strong>${b.nome} ${b.cognome}</strong>${notaInterna}</td>
       <td style="font-size:0.83rem">${b.email}</td>
-      <td style="font-size:0.83rem">${b.telefono || '–'}</td>
+      <td style="font-size:0.83rem">${b.telefono||'–'}</td>
       <td style="font-size:0.82rem;max-width:180px">${itemsStr}</td>
       <td><strong>€${(b.total||0).toFixed(2)}</strong></td>
-      <td style="font-size:0.83rem">${payMap[b.paymentMethod] || b.paymentMethod}</td>
-      <td>${statusMap[b.status] || b.status}</td>
+      <td style="font-size:0.83rem">${payMap[b.paymentMethod]||b.paymentMethod}</td>
+      <td>${statusMap[b.status]||b.status}</td>
       <td style="font-size:0.82rem">${date}</td>
       <td>
         <div class="actions-cell">
-          ${b.status !== 'paid' && b.status !== 'cancelled' ? `<button class="btn btn-sm btn-gold" onclick="markPaid('${b.id}')">✅ Pagato</button>` : ''}
-          ${b.status !== 'cancelled' ? `<button class="btn btn-sm btn-danger" onclick="cancelBooking('${b.id}')">✕ Annulla</button>` : ''}
-          <button class="btn btn-sm btn-outline" onclick="deleteBooking('${b.id}')" style="color:var(--red-soft)" title="Elimina definitivamente">🗑️</button>
+          ${b.status !== 'paid' && b.status !== 'cancelled' && b.status !== 'waitlist' ? `<button class="btn btn-sm btn-gold" onclick="markPaid('${b.id}')">✅</button>` : ''}
+          <button class="btn btn-sm btn-outline" onclick="openEdit('${b.id}')" title="Modifica">✏️</button>
+          ${b.status !== 'waitlist' ? `<button class="btn btn-sm btn-outline" onclick="printRicevuta('${b.id}')" title="Ricevuta">🖨️</button>` : ''}
+          <button class="btn btn-sm btn-outline" onclick="deleteBooking('${b.id}')" style="color:var(--red-soft)" title="Elimina">🗑️</button>
         </div>
       </td>
     </tr>`;
@@ -346,68 +741,247 @@ function renderTable() {
 }
 
 // ============================================================
-// ACTIONS
+// EDIT MODAL
+// ============================================================
+function openEdit(id) {
+  const b = allBookings.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-nome').value = b.nome || '';
+  document.getElementById('edit-cognome').value = b.cognome || '';
+  document.getElementById('edit-email').value = b.email || '';
+  document.getElementById('edit-telefono').value = b.telefono || '';
+  document.getElementById('edit-note').value = b.note || '';
+  document.getElementById('edit-nota-interna').value = b.notaInterna || '';
+  document.getElementById('edit-status').value = b.status || 'pending_secretariat';
+  // Edit items
+  const menuItems = configData.menuItems || [];
+  const editItems = document.getElementById('edit-items-container');
+  editItems.innerHTML = '<div class="card-title" style="font-size:0.95rem;margin-bottom:0.75rem"><span>🍽️</span> Ordine</div>' +
+    menuItems.map(item => {
+      const current = (b.items||[]).find(i => i.id === item.id);
+      const qty = current ? current.qty : 0;
+      return `<div class="menu-item" style="padding:0.6rem 0">
+        <div class="menu-item-info"><div class="name" style="font-size:0.9rem">${item.name}</div></div>
+        <div class="menu-item-price" style="font-size:0.95rem">€${parseFloat(item.price).toFixed(2)}</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="editQty('${item.id}',-1)">−</button>
+          <span class="qty-val" id="eqty-${item.id}">${qty}</span>
+          <button class="qty-btn" onclick="editQty('${item.id}',+1)">+</button>
+        </div>
+      </div>`;
+    }).join('');
+  document.getElementById('modal-edit').classList.remove('hidden');
+}
+
+function editQty(id, delta) {
+  const el = document.getElementById('eqty-' + id);
+  el.textContent = Math.max(0, parseInt(el.textContent) + delta);
+}
+
+async function saveEdit() {
+  const id = document.getElementById('edit-id').value;
+  const b = allBookings.find(x => x.id === id);
+  const menuItems = configData.menuItems || [];
+  const items = menuItems
+    .map(item => ({ id:item.id, name:item.name, qty:parseInt(document.getElementById('eqty-'+item.id)?.textContent||0), price:item.price }))
+    .filter(i => i.qty > 0);
+  const total = items.reduce((a,i) => a + i.qty * parseFloat(i.price), 0);
+  const updated = {
+    ...b,
+    nome: document.getElementById('edit-nome').value.trim(),
+    cognome: document.getElementById('edit-cognome').value.trim(),
+    email: document.getElementById('edit-email').value.trim(),
+    telefono: document.getElementById('edit-telefono').value.trim(),
+    note: document.getElementById('edit-note').value.trim(),
+    notaInterna: document.getElementById('edit-nota-interna').value.trim(),
+    status: document.getElementById('edit-status').value,
+    items, total, updatedAt: new Date().toISOString()
+  };
+  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify(updated) });
+  closeModal('modal-edit');
+  showToast('✅ Prenotazione aggiornata!');
+  await loadBookings();
+}
+
+// ============================================================
+// MARK PAID
+// ============================================================
+async function markPaid(id) {
+  if (!confirm('Segna come pagata?')) return;
+  await fetch('/api/update-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id, status:'paid'}) });
+  await loadBookings();
+}
+
+// ============================================================
+// DELETE
 // ============================================================
 async function deleteBooking(id) {
-  if (!confirm('Eliminare definitivamente questa prenotazione? L\'operazione è irreversibile.')) return;
-  await fetch('/api/delete-booking', {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify({ id })
-  });
+  if (!confirm('Eliminare definitivamente questa prenotazione?')) return;
+  await fetch('/api/delete-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({id}) });
   await loadBookings();
 }
-
 async function deleteAll() {
-  if (!confirm('⚠️ Eliminare TUTTE le prenotazioni? Questa operazione è irreversibile!')) return;
-  if (!confirm('Sei sicuro? Verranno eliminati tutti gli ordini, inclusi quelli pagati.')) return;
-  await fetch('/api/delete-booking', {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify({ deleteAll: true })
-  });
-  await loadBookings();
-}
-
-async function markPaid(id) {
-  if (!confirm('Segna questa prenotazione come pagata?')) return;
-  await fetch('/api/update-booking', {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify({ id, status: 'paid' })
-  });
-  await loadBookings();
-}
-
-async function cancelBooking(id) {
-  if (!confirm('Annullare questa prenotazione?')) return;
-  await fetch('/api/update-booking', {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify({ id, status: 'cancelled' })
-  });
+  if (!confirm('⚠️ Eliminare TUTTE le prenotazioni?')) return;
+  if (!confirm('Operazione irreversibile. Continuare?')) return;
+  await fetch('/api/delete-booking', { method:'POST', headers:authHeaders(), body:JSON.stringify({deleteAll:true}) });
   await loadBookings();
 }
 
 // ============================================================
-// EXPORT CSV
+// RIEPILOGO CUCINA
 // ============================================================
-function exportCSV() {
-  const header = ['ID','Nome','Cognome','Email','Telefono','Ordine','Totale','Pagamento','Stato','Data','Note'];
-  const rows = allBookings.map(b => [
-    (b.id||'').substring(0,8).toUpperCase(),
-    b.nome, b.cognome, b.email, b.telefono||'',
-    (b.items||[]).map(i => `${i.qty}x ${i.name}`).join(' | '),
-    (b.total||0).toFixed(2),
-    b.paymentMethod, b.status,
-    b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '',
-    b.note||''
-  ]);
-  const csv = [header, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+function showCucina() {
+  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
+  const totals = {};
+  let totalPaxCount = 0;
+  active.forEach(b => {
+    (b.items||[]).forEach(item => {
+      totals[item.name] = (totals[item.name]||0) + (item.qty||1);
+      totalPaxCount += (item.qty||1);
+    });
+  });
+  const grid = document.getElementById('cucina-grid');
+  grid.innerHTML = Object.entries(totals).map(([name, qty]) =>
+    `<div class="cucina-card"><div class="cval">${qty}</div><div class="clbl">${name}</div></div>`
+  ).join('') || '<p style="color:var(--brown-light)">Nessuna prenotazione attiva.</p>';
+  document.getElementById('cucina-totale').textContent = totalPaxCount;
+  document.getElementById('modal-cucina').classList.remove('hidden');
+}
+
+// ============================================================
+// RICEVUTA PDF (stampa browser)
+// ============================================================
+function printRicevuta(id) {
+  const b = allBookings.find(x => x.id === id);
+  if (!b) return;
+  const statusLabel = { paid:'✅ Pagato', pending_secretariat:'🏛️ In attesa – Segreteria', pending_satispay:'📱 In attesa – Satispay', cancelled:'❌ Annullato' };
+  const metodiLabel = { paypal:'PayPal', satispay:'Satispay', secretariat:'Segreteria parrocchiale' };
+  const itemsHtml = (b.items||[]).map(i =>
+    `<tr><td style="padding:0.4rem 0.5rem">${i.name}</td><td style="padding:0.4rem 0.5rem;text-align:center">${i.qty}</td><td style="padding:0.4rem 0.5rem;text-align:right">€${(i.qty*parseFloat(i.price)).toFixed(2)}</td></tr>`
+  ).join('');
+  const date = b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '–';
+  const el = document.getElementById('ricevuta-print');
+  el.innerHTML = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+      <img src="${CARTA_B64}" style="width:100%;max-height:120px;object-fit:contain;object-position:left;margin-bottom:1.5rem" />
+      <hr style="border:none;border-top:2px solid #2C1A0E;margin-bottom:1.5rem"/>
+      <h2 style="font-size:1.4rem;margin-bottom:0.25rem;color:#2C1A0E">Ricevuta di prenotazione</h2>
+      <p style="color:#6B3F1F;font-size:0.9rem;margin-bottom:1.5rem">Pranzo in Parrocchia – ${configData.eventDate ? new Date(configData.eventDate).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}) : ''}</p>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem">
+        <tr><td style="padding:0.3rem 0;color:#6B3F1F;width:40%">Numero prenotazione</td><td style="padding:0.3rem 0;font-weight:bold">#${(b.id||'').substring(0,8).toUpperCase()}</td></tr>
+        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Nominativo</td><td style="padding:0.3rem 0;font-weight:bold">${b.nome} ${b.cognome}</td></tr>
+        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Email</td><td style="padding:0.3rem 0">${b.email}</td></tr>
+        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Telefono</td><td style="padding:0.3rem 0">${b.telefono||'–'}</td></tr>
+        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Data prenotazione</td><td style="padding:0.3rem 0">${date}</td></tr>
+        ${b.note ? `<tr><td style="padding:0.3rem 0;color:#6B3F1F">Note</td><td style="padding:0.3rem 0">${b.note}</td></tr>` : ''}
+      </table>
+      <table style="width:100%;border-collapse:collapse;background:#F9F4EC;border-radius:8px;overflow:hidden">
+        <thead><tr style="background:#2C1A0E;color:#F9F4EC">
+          <th style="padding:0.5rem;text-align:left;font-size:0.8rem">Voce</th>
+          <th style="padding:0.5rem;text-align:center;font-size:0.8rem">Qtà</th>
+          <th style="padding:0.5rem;text-align:right;font-size:0.8rem">Importo</th>
+        </tr></thead>
+        <tbody>${itemsHtml}</tbody>
+        <tfoot><tr style="border-top:2px solid #2C1A0E">
+          <td colspan="2" style="padding:0.5rem;font-weight:bold">Totale</td>
+          <td style="padding:0.5rem;text-align:right;font-weight:bold;color:#C8933A">€${(b.total||0).toFixed(2)}</td>
+        </tr></tfoot>
+      </table>
+      <table style="width:100%;margin-top:1rem;border-collapse:collapse">
+        <tr><td style="padding:0.3rem 0;color:#6B3F1F;width:40%">Metodo di pagamento</td><td>${metodiLabel[b.paymentMethod]||b.paymentMethod}</td></tr>
+        <tr><td style="padding:0.3rem 0;color:#6B3F1F">Stato</td><td style="font-weight:bold">${statusLabel[b.status]||b.status}</td></tr>
+      </table>
+      <hr style="border:none;border-top:1px solid #E0D5C5;margin:2rem 0 1rem"/>
+      <p style="font-size:0.8rem;color:#A0622A;text-align:center">Parrocchia San Luigi Gonzaga · Via Tagliamento 10, 20139 Milano</p>
+    </div>`;
+  el.style.display = 'block';
+  setTimeout(() => { window.print(); setTimeout(() => { el.style.display='none'; }, 500); }, 100);
+}
+
+// ============================================================
+// QR CODE
+// ============================================================
+function showQR() {
+  const url = window.location.origin + '/';
+  document.getElementById('qr-url').textContent = url;
+  drawQR(url);
+  document.getElementById('modal-qr').classList.remove('hidden');
+}
+
+function drawQR(text) {
+  // Simple QR using Google Charts API (image)
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => { ctx.drawImage(img, 0, 0, 256, 256); };
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(text)}`;
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('qr-canvas');
   const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = `prenotazioni_pranzo_${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = 'qr-prenotazioni.png';
+  a.href = canvas.toDataURL();
   a.click();
+}
+
+function printQR() {
+  const canvas = document.getElementById('qr-canvas');
+  const url = document.getElementById('qr-url').textContent;
+  const w = window.open('', '_blank');
+  w.document.write(`<html><body style="text-align:center;font-family:Arial;padding:2cm">
+    <h2>🍲 Pranzo in Parrocchia</h2>
+    <p>Inquadra il QR code per prenotare</p>
+    <img src="${canvas.toDataURL()}" style="width:200px;height:200px" />
+    <p style="font-size:0.85rem;color:#666">${url}</p>
+    <script>window.print();window.close();<\/script>
+  </body></html>`);
+}
+
+// ============================================================
+// EXPORT XLSX
+// ============================================================
+function exportXLSX() {
+  const rows = allBookings
+    .filter(b => b.status !== 'cancelled')
+    .map(b => ({
+      'ID': (b.id||'').substring(0,8).toUpperCase(),
+      'Nome': b.nome,
+      'Cognome': b.cognome,
+      'Email': b.email,
+      'Telefono': b.telefono||'',
+      'Ordine': (b.items||[]).map(i => `${i.qty}x ${i.name}`).join(' | '),
+      'Totale €': (b.total||0).toFixed(2),
+      'Pagamento': b.paymentMethod,
+      'Stato': b.status,
+      'Data': b.createdAt ? new Date(b.createdAt).toLocaleDateString('it-IT') : '',
+      'Note': b.note||'',
+      'Nota interna': b.notaInterna||''
+    }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Prenotazioni');
+  // Riepilogo cucina
+  const active = allBookings.filter(b => b.status !== 'cancelled' && b.status !== 'waitlist');
+  const totals = {};
+  active.forEach(b => { (b.items||[]).forEach(item => { totals[item.name] = (totals[item.name]||0) + (item.qty||1); }); });
+  const cucinaRows = Object.entries(totals).map(([nome, qty]) => ({'Voce': nome, 'Quantità': qty}));
+  const ws2 = XLSX.utils.json_to_sheet(cucinaRows);
+  XLSX.utils.book_append_sheet(wb, ws2, 'Riepilogo cucina');
+  XLSX.writeFile(wb, `prenotazioni_pranzo_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+// ============================================================
+// MODAL UTILS
+// ============================================================
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function showToast(msg) {
+  const t = document.getElementById('save-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
 // ============================================================

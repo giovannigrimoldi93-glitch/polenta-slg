@@ -158,6 +158,10 @@
         </label>
       </div>
     </div>
+    <div class="form-group">
+      <label>Messaggio prenotazioni chiuse</label>
+      <input type="text" id="cfg-closedMessage" placeholder="es. Le prenotazioni sono chiuse. Grazie a tutti!" />
+    </div>
   </div>
 
   <!-- MENU -->
@@ -234,6 +238,7 @@ async function loadConfig() {
   if (cfg.bookingDeadline) document.getElementById('cfg-bookingDeadline').value = cfg.bookingDeadline.split('T')[0];
   document.getElementById('cfg-maxSeats').value = cfg.maxSeats || 320;
   document.getElementById('cfg-bookingOpen').checked = cfg.bookingOpen !== false;
+  document.getElementById('cfg-closedMessage').value = cfg.closedMessage || '';
   document.getElementById('cfg-paypalClientId').value = cfg.paypalClientId || '';
   document.getElementById('cfg-satispayLink').value = cfg.satispayLink || '';
   renderMenuItems();
@@ -299,6 +304,7 @@ async function saveAll() {
     bookingDeadline: document.getElementById('cfg-bookingDeadline').value,
     maxSeats: parseInt(document.getElementById('cfg-maxSeats').value) || 320,
     bookingOpen: document.getElementById('cfg-bookingOpen').checked,
+    closedMessage: document.getElementById('cfg-closedMessage').value.trim(),
     paypalClientId: document.getElementById('cfg-paypalClientId').value.trim(),
     satispayLink: document.getElementById('cfg-satispayLink').value.trim(),
     menuItems: menuItems.filter(i => i.name.trim())

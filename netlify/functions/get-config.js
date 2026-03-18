@@ -30,6 +30,7 @@ exports.handler = async (event) => {
       emailjsTemplateId: config.emailjsTemplateId || '',
       emailjsPublicKey: config.emailjsPublicKey || '',
       adminEmail: config.adminEmail || 'giovanni.grimoldi93@gmail.com',
+      closedMessage: config.closedMessage || '',
       menuItems: config.menuItems || [
         { id: 'adulto', name: 'Polenta – Adulto', description: 'Porzione adulto', price: '12.00' },
         { id: 'bambino', name: 'Polenta – Bambino', description: 'Porzione bambino', price: '10.00' },

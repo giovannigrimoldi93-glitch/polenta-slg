@@ -5,14 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pranzo in Parrocchia – Prenotazione</title>
   <link rel="stylesheet" href="css/style.css" />
-  <style>
-    .zero-state {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--brown-light);
-    }
-    .zero-state .big { font-size: 3rem; margin-bottom: 0.5rem; }
-  </style>
 </head>
 <body>
 
@@ -24,15 +16,19 @@
 
 <div class="container">
 
+  <!-- COUNTDOWN -->
+  <div class="card" id="countdown-card" style="display:none;text-align:center">
+    <div class="card-title" style="justify-content:center"><span class="icon">⏰</span> Chiusura prenotazioni</div>
+    <div id="countdown-display" style="font-family:var(--font-display);font-size:1.6rem;color:var(--gold)"></div>
+  </div>
+
   <!-- POSTI DISPONIBILI -->
   <div class="card" id="posti-card">
     <div class="card-title"><span class="icon">🎟️</span> Disponibilità</div>
-    <div id="posti-info">
-      <div class="posti-bar"><div class="posti-fill" id="posti-fill" style="width:0%"></div></div>
-      <div class="posti-text">
-        <span id="posti-label">Caricamento...</span>
-        <span id="posti-perc"></span>
-      </div>
+    <div class="posti-bar"><div class="posti-fill" id="posti-fill" style="width:0%"></div></div>
+    <div class="posti-text">
+      <span id="posti-label">Caricamento...</span>
+      <span id="posti-perc"></span>
     </div>
   </div>
 
@@ -48,7 +44,7 @@
     <div class="card">
       <div class="card-title"><span class="icon">🍽️</span> Scegli il tuo menù</div>
       <div id="menu-items-container">
-        <div class="zero-state"><div class="big">⏳</div>Caricamento menù...</div>
+        <div class="zero-state" style="text-align:center;padding:2rem;color:var(--brown-light)"><div style="font-size:3rem">⏳</div>Caricamento menù...</div>
       </div>
     </div>
 
@@ -62,97 +58,59 @@
     <div class="card">
       <div class="card-title"><span class="icon">👤</span> I tuoi dati</div>
       <div class="form-row">
-        <div class="form-group">
-          <label>Nome *</label>
-          <input type="text" id="nome" placeholder="Mario" />
-        </div>
-        <div class="form-group">
-          <label>Cognome *</label>
-          <input type="text" id="cognome" placeholder="Rossi" />
-        </div>
+        <div class="form-group"><label>Nome *</label><input type="text" id="nome" placeholder="Mario" /></div>
+        <div class="form-group"><label>Cognome *</label><input type="text" id="cognome" placeholder="Rossi" /></div>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <label>Email *</label>
-          <input type="email" id="email" placeholder="mario@email.it" />
-        </div>
-        <div class="form-group">
-          <label>Telefono</label>
-          <input type="tel" id="telefono" placeholder="333 1234567" />
-        </div>
+        <div class="form-group"><label>Email *</label><input type="email" id="email" placeholder="mario@email.it" /></div>
+        <div class="form-group"><label>Telefono *</label><input type="tel" id="telefono" placeholder="333 1234567" /></div>
       </div>
-      <div class="form-group">
-        <label>Note (es. allergie, esigenze particolari)</label>
-        <input type="text" id="note" placeholder="Facoltativo" />
-      </div>
+      <div class="form-group"><label>Note (es. allergie, esigenze particolari)</label><input type="text" id="note" placeholder="Facoltativo" /></div>
     </div>
 
     <!-- PAGAMENTO -->
     <div class="card">
       <div class="card-title"><span class="icon">💳</span> Metodo di pagamento</div>
       <div class="payment-options" id="payment-options">
-
         <label class="payment-option" id="opt-paypal">
           <input type="radio" name="payment" value="paypal" />
-          <div>
-            <div class="po-label">💳 PayPal</div>
-            <div class="po-desc">Paga subito online con PayPal o carta di credito. Prenotazione confermata immediatamente.</div>
-          </div>
+          <div><div class="po-label">💳 PayPal</div><div class="po-desc">Paga subito online con PayPal o carta di credito. Prenotazione confermata immediatamente.</div></div>
         </label>
-
         <label class="payment-option" id="opt-satispay">
           <input type="radio" name="payment" value="satispay" />
-          <div>
-            <div class="po-label">📱 Satispay</div>
-            <div class="po-desc">Verrai reindirizzato su Satispay per completare il pagamento.</div>
-          </div>
+          <div><div class="po-label">📱 Satispay</div><div class="po-desc">Verrai reindirizzato su Satispay per completare il pagamento.</div></div>
         </label>
-
         <label class="payment-option" id="opt-secretariat">
           <input type="radio" name="payment" value="secretariat" />
-          <div>
-            <div class="po-label">🏛️ Paga in segreteria</div>
-            <div class="po-desc">Prenota ora e porta la quota in segreteria parrocchiale entro la data limite. La prenotazione sarà confermata al pagamento fisico.</div>
-          </div>
+          <div><div class="po-label">🏛️ Paga in segreteria</div><div class="po-desc">Prenota ora e porta la quota in segreteria parrocchiale entro la data limite.</div></div>
         </label>
-
       </div>
-
-      <!-- PayPal button -->
       <div id="paypal-button-container" class="hidden"></div>
-
-      <!-- Satispay redirect info -->
       <div id="satispay-info" class="alert alert-info hidden" style="margin-top:1rem">
-        <span>📱</span>
-        <span>Dopo aver compilato il form, verrai reindirizzato su Satispay per completare il pagamento dell'importo esatto.</span>
+        <span>📱</span><span>Dopo aver compilato il form, verrai reindirizzato su Satispay per completare il pagamento.</span>
       </div>
     </div>
 
-    <!-- ERRORE -->
+    <!-- LISTA D'ATTESA -->
+    <div class="alert alert-warning hidden" id="waitlist-alert">
+      <span>⏳</span><span>I posti sono esauriti. Puoi iscriverti alla lista d'attesa: verrai contattato se si liberano posti.</span>
+    </div>
+
     <div class="alert alert-error hidden" id="form-error"></div>
+    <button class="btn btn-primary" id="submit-btn" style="display:none" onclick="submitBooking()">Conferma prenotazione</button>
+    <button class="btn btn-primary" id="waitlist-btn" style="display:none;background:var(--gold)" onclick="submitWaitlist()">📋 Iscriviti alla lista d'attesa</button>
 
-    <!-- SUBMIT (non PayPal) -->
-    <button class="btn btn-primary" id="submit-btn" style="display:none" onclick="submitBooking()">
-      Conferma prenotazione
-    </button>
+  </div>
 
-  </div><!-- /form-area -->
+</div>
 
-</div><!-- /container -->
-
-<!-- PayPal SDK - verrà caricato dinamicamente -->
 <script>
-// ============================================================
-// CONFIG (caricata da API)
-// ============================================================
 let config = {};
 let menuItems = [];
 let quantities = {};
 let selectedPayment = null;
+let postiEsauriti = false;
 
-// ============================================================
-// INIT
-// ============================================================
 async function init() {
   try {
     const res = await fetch('/api/get-config');
@@ -160,84 +118,85 @@ async function init() {
     config = data;
     menuItems = data.menuItems || [];
 
-    // Aggiorna header data
     if (data.eventDate) {
       const d = new Date(data.eventDate);
       document.getElementById('event-date-display').textContent =
         d.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
     }
 
-    // Controlla se aperto
+    // Countdown
+    if (data.bookingDeadline) {
+      startCountdown(new Date(data.bookingDeadline));
+    }
+
     const now = new Date();
     const deadline = data.bookingDeadline ? new Date(data.bookingDeadline) : null;
-    if (!data.bookingOpen || (deadline && now > deadline)) {
+    const isClosed = !data.bookingOpen || (deadline && now > deadline);
+
+    await updatePosti(data.maxSeats, data.bookedSeats || 0);
+    postiEsauriti = (data.maxSeats - (data.bookedSeats || 0)) <= 0;
+
+    if (isClosed) {
+      const msg = data.closedMessage || 'Le prenotazioni sono chiuse.';
       document.getElementById('closed-alert').classList.remove('hidden');
-      document.getElementById('closed-message').textContent =
-        deadline && now > deadline
-          ? `Le prenotazioni sono chiuse il ${deadline.toLocaleDateString('it-IT')}.`
-          : 'Le prenotazioni sono attualmente chiuse.';
+      document.getElementById('closed-message').textContent = msg;
       document.getElementById('form-area').style.display = 'none';
       return;
     }
 
-    // Posti
-    await updatePosti(data.maxSeats, data.bookedSeats || 0);
-
-    // Menù
     renderMenu();
 
-    // PayPal
     if (data.paypalClientId) {
       const s = document.createElement('script');
       s.src = `https://www.paypal.com/sdk/js?client-id=${data.paypalClientId}&currency=EUR`;
-      s.onload = () => initPayPal();
+      s.onload = () => {};
       document.head.appendChild(s);
     } else {
       document.getElementById('opt-paypal').classList.add('hidden');
     }
+    if (!data.satispayLink) document.getElementById('opt-satispay').classList.add('hidden');
 
-    // Satispay link
-    if (!data.satispayLink) {
-      document.getElementById('opt-satispay').classList.add('hidden');
+    document.querySelectorAll('input[name=payment]').forEach(el => el.addEventListener('change', onPaymentChange));
+
+    if (postiEsauriti) {
+      document.getElementById('waitlist-alert').classList.remove('hidden');
+      document.getElementById('waitlist-btn').style.display = 'flex';
+      document.querySelectorAll('.payment-option').forEach(el => el.style.display = 'none');
     }
-
-    // Payment listeners
-    document.querySelectorAll('input[name=payment]').forEach(el => {
-      el.addEventListener('change', onPaymentChange);
-    });
-
-  } catch(e) {
-    console.error(e);
-  }
+  } catch(e) { console.error(e); }
 }
 
-// ============================================================
-// POSTI
-// ============================================================
+function startCountdown(deadline) {
+  const card = document.getElementById('countdown-card');
+  const display = document.getElementById('countdown-display');
+  function update() {
+    const diff = deadline - new Date();
+    if (diff <= 0) { card.style.display = 'none'; return; }
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    if (days > 0) display.textContent = `${days} giorni e ${hours} ore`;
+    else if (hours > 0) display.textContent = `${hours} ore e ${mins} minuti`;
+    else display.textContent = `${mins} minuti`;
+    card.style.display = 'block';
+  }
+  update();
+  setInterval(update, 60000);
+}
+
 async function updatePosti(max, booked) {
   const avail = max - booked;
   const perc = Math.min(100, (booked / max) * 100);
   const fill = document.getElementById('posti-fill');
   fill.style.width = perc + '%';
   fill.className = 'posti-fill' + (perc >= 90 ? ' critical' : perc >= 70 ? ' warning' : '');
-  document.getElementById('posti-label').textContent = `${avail} posti disponibili su ${max}`;
+  document.getElementById('posti-label').textContent = `${Math.max(0,avail)} posti disponibili su ${max}`;
   document.getElementById('posti-perc').textContent = `${Math.round(perc)}% prenotato`;
-  if (avail <= 0) {
-    document.getElementById('closed-alert').classList.remove('hidden');
-    document.getElementById('closed-message').textContent = 'Spiacenti, i posti sono esauriti.';
-    document.getElementById('form-area').style.display = 'none';
-  }
 }
 
-// ============================================================
-// MENÙ
-// ============================================================
 function renderMenu() {
   const container = document.getElementById('menu-items-container');
-  if (!menuItems.length) {
-    container.innerHTML = '<div class="zero-state"><div class="big">🍽️</div>Nessuna voce di menù configurata.</div>';
-    return;
-  }
+  if (!menuItems.length) { container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--brown-light)">Nessuna voce di menù configurata.</div>'; return; }
   container.innerHTML = menuItems.map(item => `
     <div class="menu-item">
       <div class="menu-item-info">
@@ -264,66 +223,37 @@ function changeQty(id, delta) {
 function updateSummary() {
   const lines = [];
   let total = 0;
-  let totalPax = 0;
   menuItems.forEach(item => {
     const q = quantities[item.id] || 0;
-    if (q > 0) {
-      const sub = q * parseFloat(item.price);
-      total += sub;
-      totalPax += q;
-      lines.push({ label: `${item.name} × ${q}`, amount: sub });
-    }
+    if (q > 0) { const sub = q * parseFloat(item.price); total += sub; lines.push({ label: `${item.name} × ${q}`, amount: sub }); }
   });
-
   const card = document.getElementById('summary-card');
-  const linesEl = document.getElementById('summary-lines');
-
   if (!lines.length) {
     card.style.display = 'none';
     document.getElementById('submit-btn').style.display = 'none';
     document.getElementById('paypal-button-container').innerHTML = '';
     return;
   }
-
   card.style.display = 'block';
-  linesEl.innerHTML = lines.map(l =>
+  document.getElementById('summary-lines').innerHTML = lines.map(l =>
     `<div class="summary-line"><span>${l.label}</span><span>€${l.amount.toFixed(2)}</span></div>`
   ).join('') + `<div class="summary-line total"><span>Totale</span><span>€${total.toFixed(2)}</span></div>`;
-
-  // mostra submit se non paypal
-  if (selectedPayment && selectedPayment !== 'paypal') {
-    document.getElementById('submit-btn').style.display = 'flex';
-  }
-  if (selectedPayment === 'paypal') {
-    renderPayPalButton(total);
-  }
+  if (selectedPayment && selectedPayment !== 'paypal') document.getElementById('submit-btn').style.display = 'flex';
+  if (selectedPayment === 'paypal') renderPayPalButton(total);
 }
 
-function getTotal() {
-  return menuItems.reduce((acc, item) => acc + (quantities[item.id] || 0) * parseFloat(item.price), 0);
-}
+function getTotal() { return menuItems.reduce((acc, item) => acc + (quantities[item.id] || 0) * parseFloat(item.price), 0); }
+function getOrderItems() { return menuItems.filter(item => (quantities[item.id] || 0) > 0).map(item => ({ id: item.id, name: item.name, qty: quantities[item.id], price: item.price })); }
 
-function getOrderItems() {
-  return menuItems
-    .filter(item => (quantities[item.id] || 0) > 0)
-    .map(item => ({ id: item.id, name: item.name, qty: quantities[item.id], price: item.price }));
-}
-
-// ============================================================
-// PAYMENT CHANGE
-// ============================================================
 function onPaymentChange(e) {
   selectedPayment = e.target.value;
   document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
   e.target.closest('.payment-option').classList.add('selected');
-
   document.getElementById('paypal-button-container').classList.add('hidden');
   document.getElementById('satispay-info').classList.add('hidden');
   document.getElementById('submit-btn').style.display = 'none';
-
   const total = getTotal();
   if (!total) return;
-
   if (selectedPayment === 'paypal') {
     document.getElementById('paypal-button-container').classList.remove('hidden');
     renderPayPalButton(total);
@@ -337,11 +267,6 @@ function onPaymentChange(e) {
   }
 }
 
-// ============================================================
-// PAYPAL
-// ============================================================
-function initPayPal() { /* ready */ }
-
 function renderPayPalButton(total) {
   const container = document.getElementById('paypal-button-container');
   container.innerHTML = '';
@@ -349,35 +274,23 @@ function renderPayPalButton(total) {
   paypal.Buttons({
     createOrder: (data, actions) => {
       if (!validateForm()) return;
-      return actions.order.create({
-        purchase_units: [{ amount: { value: total.toFixed(2) }, description: 'Pranzo in Parrocchia' }]
-      });
+      return actions.order.create({ purchase_units: [{ amount: { value: total.toFixed(2) }, description: 'Pranzo in Parrocchia' }] });
     },
     onApprove: async (data, actions) => {
       const order = await actions.order.capture();
       await saveBooking('paypal', order.id);
     },
-    onError: (err) => {
-      showError('Errore PayPal. Riprova o scegli un altro metodo di pagamento.');
-    }
+    onError: () => showError('Errore PayPal. Riprova o scegli un altro metodo.')
   }).render('#paypal-button-container');
 }
 
-// ============================================================
-// SUBMIT
-// ============================================================
 async function submitBooking() {
   if (!validateForm()) return;
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="loader"></span> Invio in corso...';
-  try {
-    await saveBooking(selectedPayment, null);
-  } catch(e) {
-    showError('Errore durante la prenotazione. Riprova.');
-    btn.disabled = false;
-    btn.innerHTML = 'Conferma prenotazione';
-  }
+  try { await saveBooking(selectedPayment, null); }
+  catch(e) { showError('Errore durante la prenotazione. Riprova.'); btn.disabled = false; btn.innerHTML = selectedPayment === 'satispay' ? 'Continua su Satispay →' : 'Conferma prenotazione'; }
 }
 
 async function saveBooking(paymentMethod, transactionId) {
@@ -394,57 +307,50 @@ async function saveBooking(paymentMethod, transactionId) {
     status: paymentMethod === 'paypal' ? 'paid' : (paymentMethod === 'satispay' ? 'pending_satispay' : 'pending_secretariat'),
     createdAt: new Date().toISOString()
   };
-
-  const res = await fetch('/api/prenota', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(booking)
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || 'Errore server');
-  }
-
+  const res = await fetch('/api/prenota', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(booking) });
+  if (!res.ok) { const err = await res.json(); throw new Error(err.message || 'Errore server'); }
   const result = await res.json();
 
   // Satispay redirect
   if (paymentMethod === 'satispay' && config.satispayLink) {
     const importoCentesimi = Math.round(getTotal() * 100);
     const redirectUrl = encodeURIComponent(`https://polentata-slg.netlify.app/grazie.html?id=${result.id}&nome=${encodeURIComponent(booking.nome)}&metodo=satispay`);
-    const link = config.satispayLink + (config.satispayLink.includes("?") ? "&" : "?") + `amount=${importoCentesimi}&ref=${result.id}&redirect_url=${redirectUrl}`;
+    const link = config.satispayLink + (config.satispayLink.includes('?') ? '&' : '?') + `amount=${importoCentesimi}&ref=${result.id}&redirect_url=${redirectUrl}`;
     window.location.href = link;
     return;
   }
-
-  // Redirect grazie
   window.location.href = `/grazie.html?id=${result.id}&nome=${encodeURIComponent(booking.nome)}&metodo=${paymentMethod}`;
 }
 
-// ============================================================
-// VALIDATION
-// ============================================================
+async function submitWaitlist() {
+  const nome = document.getElementById('nome').value.trim();
+  const cognome = document.getElementById('cognome').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const telefono = document.getElementById('telefono').value.trim();
+  if (!nome || !cognome) { showError('Inserisci nome e cognome.'); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Inserisci un\'email valida.'); return; }
+  const btn = document.getElementById('waitlist-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span> Iscrizione...';
+  try {
+    const res = await fetch('/api/prenota', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome, cognome, email, telefono, items: [], total: 0, paymentMethod: 'waitlist', status: 'waitlist', createdAt: new Date().toISOString() }) });
+    const result = await res.json();
+    window.location.href = `/grazie.html?id=${result.id}&nome=${encodeURIComponent(nome)}&metodo=waitlist`;
+  } catch(e) { showError('Errore. Riprova.'); btn.disabled = false; btn.innerHTML = '📋 Iscriviti alla lista d\'attesa'; }
+}
+
 function validateForm() {
-  const items = getOrderItems();
-  if (!items.length) { showError('Seleziona almeno una voce dal menù.'); return false; }
+  if (!getOrderItems().length) { showError('Seleziona almeno una voce dal menù.'); return false; }
   if (!document.getElementById('nome').value.trim()) { showError('Inserisci il tuo nome.'); return false; }
   if (!document.getElementById('cognome').value.trim()) { showError('Inserisci il tuo cognome.'); return false; }
   const email = document.getElementById('email').value.trim();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Inserisci un\'email valida.'); return false; }
+  if (!document.getElementById('telefono').value.trim()) { showError('Inserisci il tuo numero di telefono.'); return false; }
   if (!selectedPayment) { showError('Seleziona un metodo di pagamento.'); return false; }
-  hideError();
-  return true;
+  hideError(); return true;
 }
-
-function showError(msg) {
-  const el = document.getElementById('form-error');
-  el.innerHTML = '⚠️ ' + msg;
-  el.classList.remove('hidden');
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-function hideError() {
-  document.getElementById('form-error').classList.add('hidden');
-}
+function showError(msg) { const el = document.getElementById('form-error'); el.innerHTML = '⚠️ ' + msg; el.classList.remove('hidden'); el.scrollIntoView({ behavior:'smooth', block:'center' }); }
+function hideError() { document.getElementById('form-error').classList.add('hidden'); }
 
 init();
 </script>

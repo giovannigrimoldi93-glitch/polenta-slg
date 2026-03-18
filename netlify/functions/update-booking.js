@@ -18,7 +18,7 @@ exports.handler = async (event) => {
     return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
   try {
-    const { id, status } = JSON.parse(event.body);
+    const payload = JSON.parse(event.body);
     const apiKey = process.env.JSONBIN_API_KEY;
     const binId = process.env.JSONBIN_BOOKINGS_BIN_ID;
 
@@ -28,11 +28,16 @@ exports.handler = async (event) => {
     const data = await res.json();
     const bookings = data.record?.bookings || [];
 
-    const idx = bookings.findIndex(b => b.id === id);
+    const idx = bookings.findIndex(b => b.id === payload.id);
     if (idx === -1) return { statusCode: 404, headers: CORS, body: JSON.stringify({ error: 'Not found' }) };
 
-    bookings[idx].status = status;
-    bookings[idx].updatedAt = new Date().toISOString();
+    // Supporta sia aggiornamento completo che solo status
+    if (payload.status && Object.keys(payload).length === 2) {
+      bookings[idx].status = payload.status;
+      bookings[idx].updatedAt = new Date().toISOString();
+    } else {
+      bookings[idx] = { ...payload, updatedAt: new Date().toISOString() };
+    }
 
     await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
       method: 'PUT',

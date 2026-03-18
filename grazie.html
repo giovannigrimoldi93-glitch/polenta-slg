@@ -6,138 +6,52 @@
   <title>Prenotazione confermata – Pranzo in Parrocchia</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .grazie-wrap {
-      text-align: center;
-      padding: 3rem 1rem;
-    }
-    .big-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-    }
-    @keyframes pop {
-      from { transform: scale(0); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-    .grazie-title {
-      font-size: clamp(1.6rem, 5vw, 2.4rem);
-      margin-bottom: 0.5rem;
-    }
-    .grazie-sub {
-      color: var(--brown-light);
-      margin-bottom: 2rem;
-      font-size: 1rem;
-    }
-    .info-box {
-      background: var(--warm-white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin: 1.5rem auto;
-      max-width: 420px;
-      text-align: left;
-    }
-    .info-box h3 {
-      font-size: 1rem;
-      color: var(--brown-mid);
-      margin-bottom: 0.75rem;
-    }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.3rem 0;
-      font-size: 0.9rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-row span:first-child { color: var(--brown-light); }
-    .info-row span:last-child { font-weight: 600; }
-    .satispay-box {
-      background: #FFF8E1;
-      border: 1px solid #FFD54F;
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
-      margin: 1rem auto;
-      max-width: 420px;
-    }
+    .grazie-wrap { text-align:center; padding:3rem 1rem; }
+    .big-icon { font-size:4rem; margin-bottom:1rem; animation: pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both; }
+    @keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+    .grazie-title { font-size:clamp(1.6rem,5vw,2.4rem); margin-bottom:0.5rem; }
+    .grazie-sub { color:var(--brown-light); margin-bottom:2rem; font-size:1rem; }
+    .info-box { background:var(--warm-white); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin:1.5rem auto; max-width:420px; text-align:left; }
+    .info-box h3 { font-size:1rem; color:var(--brown-mid); margin-bottom:0.75rem; }
+    .info-row { display:flex; justify-content:space-between; padding:0.3rem 0; font-size:0.9rem; border-bottom:1px solid var(--border); }
+    .info-row:last-child { border-bottom:none; }
+    .info-row span:first-child { color:var(--brown-light); }
+    .info-row span:last-child { font-weight:600; }
   </style>
 </head>
 <body>
-
 <div class="page-header">
   <div class="subtitle">Parrocchia San Luigi Gonzaga · Milano</div>
   <h1>🍲 Pranzo in Parrocchia</h1>
 </div>
-
 <div class="container">
   <div class="grazie-wrap">
-
     <div class="big-icon" id="big-icon">✅</div>
     <h1 class="grazie-title" id="grazie-title">Prenotazione ricevuta!</h1>
-    <p class="grazie-sub" id="grazie-sub">Grazie <strong id="nome-display"></strong>, abbiamo ricevuto la tua prenotazione.</p>
-
+    <p class="grazie-sub">Grazie <strong id="nome-display"></strong>, abbiamo ricevuto la tua prenotazione.</p>
     <div class="info-box">
       <h3>📋 Riepilogo</h3>
-      <div class="info-row">
-        <span>Numero prenotazione</span>
-        <span id="booking-id">–</span>
-      </div>
-      <div class="info-row">
-        <span>Metodo di pagamento</span>
-        <span id="metodo-display">–</span>
-      </div>
-      <div class="info-row">
-        <span>Stato</span>
-        <span id="stato-display">–</span>
-      </div>
+      <div class="info-row"><span>Numero prenotazione</span><span id="booking-id">–</span></div>
+      <div class="info-row"><span>Metodo di pagamento</span><span id="metodo-display">–</span></div>
+      <div class="info-row"><span>Stato</span><span id="stato-display">–</span></div>
     </div>
-
-    <div class="satispay-box hidden" id="satispay-reminder">
-      <strong>📱 Pagamento Satispay in sospeso</strong>
-      <p style="margin-top:0.5rem; font-size:0.9rem">
-        Se non hai completato il pagamento su Satispay, la tua prenotazione non sarà confermata.<br>
-        Puoi tornare indietro e riprovare.
-      </p>
-    </div>
-
     <a href="/" class="btn btn-outline" style="margin-top:1rem">← Torna alla home</a>
-
   </div>
 </div>
-
 <script>
 const params = new URLSearchParams(window.location.search);
 const id = params.get('id');
 const nome = params.get('nome');
 const metodo = params.get('metodo');
-
 document.getElementById('nome-display').textContent = nome || '';
-document.getElementById('booking-id').textContent = id ? '#' + id.substring(0, 8).toUpperCase() : '–';
-
-const metodiLabel = {
-  paypal: '💳 PayPal',
-  satispay: '📱 Satispay',
-  secretariat: '🏛️ Pagamento in segreteria'
-};
-const statiLabel = {
-  paypal: '<span class="badge badge-paid">✅ Pagato</span>',
-  satispay: '<span class="badge badge-pending">⏳ In attesa di pagamento</span>',
-  secretariat: '<span class="badge badge-secretariat">🏛️ Da pagare in segreteria</span>'
-};
-
+document.getElementById('booking-id').textContent = id ? '#' + id.substring(0,8).toUpperCase() : '–';
+const metodiLabel = { paypal:'💳 PayPal', satispay:'📱 Satispay', secretariat:'🏛️ Pagamento in segreteria', waitlist:'📋 Lista d\'attesa' };
+const statiLabel = { paypal:'<span class="badge badge-paid">✅ Pagato</span>', satispay:'<span class="badge badge-pending">⏳ In attesa</span>', secretariat:'<span class="badge badge-secretariat">🏛️ Da pagare in segreteria</span>', waitlist:'<span class="badge badge-pending">📋 In lista d\'attesa</span>' };
 document.getElementById('metodo-display').textContent = metodiLabel[metodo] || metodo;
 document.getElementById('stato-display').innerHTML = statiLabel[metodo] || '–';
-
-if (metodo === 'satispay') {
-  document.getElementById('big-icon').textContent = '⏳';
-  document.getElementById('grazie-title').textContent = 'Prenotazione ricevuta – pagamento in attesa';
-  document.getElementById('satispay-reminder').classList.remove('hidden');
-}
-if (metodo === 'secretariat') {
-  document.getElementById('big-icon').textContent = '📋';
-  document.getElementById('grazie-title').textContent = 'Prenotazione registrata!';
-  document.getElementById('grazie-sub').innerHTML = `Grazie <strong>${nome || ''}</strong>, ricordati di passare in segreteria per completare il pagamento.`;
-}
+if (metodo === 'waitlist') { document.getElementById('big-icon').textContent = '📋'; document.getElementById('grazie-title').textContent = 'Sei in lista d\'attesa!'; }
+if (metodo === 'satispay') { document.getElementById('big-icon').textContent = '⏳'; document.getElementById('grazie-title').textContent = 'Prenotazione ricevuta – pagamento in attesa'; }
+if (metodo === 'secretariat') { document.getElementById('big-icon').textContent = '📋'; document.getElementById('grazie-title').textContent = 'Prenotazione registrata!'; }
 </script>
 </body>
 </html>
