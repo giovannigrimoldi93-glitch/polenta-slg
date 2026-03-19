@@ -6,17 +6,18 @@
   <title>Prenotazione confermata – Pranzo in Parrocchia</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .grazie-wrap { text-align:center; padding:3rem 1rem; }
-    .big-icon { font-size:4rem; margin-bottom:1rem; animation: pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both; }
-    @keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
-    .grazie-title { font-size:clamp(1.6rem,5vw,2.4rem); margin-bottom:0.5rem; }
-    .grazie-sub { color:var(--brown-light); margin-bottom:2rem; font-size:1rem; }
-    .info-box { background:var(--warm-white); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin:1.5rem auto; max-width:420px; text-align:left; }
-    .info-box h3 { font-size:1rem; color:var(--brown-mid); margin-bottom:0.75rem; }
-    .info-row { display:flex; justify-content:space-between; padding:0.3rem 0; font-size:0.9rem; border-bottom:1px solid var(--border); }
-    .info-row:last-child { border-bottom:none; }
-    .info-row span:first-child { color:var(--brown-light); }
-    .info-row span:last-child { font-weight:600; }
+    .grazie-wrap{text-align:center;padding:3rem 1rem}
+    .big-icon{font-size:4rem;margin-bottom:1rem;animation:pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both}
+    @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+    .grazie-title{font-size:clamp(1.6rem,5vw,2.4rem);margin-bottom:0.5rem}
+    .grazie-sub{color:var(--brown-light);margin-bottom:2rem;font-size:1rem}
+    .info-box{background:var(--warm-white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1.5rem auto;max-width:420px;text-align:left}
+    .info-box h3{font-size:1rem;color:var(--brown-mid);margin-bottom:0.75rem}
+    .info-row{display:flex;justify-content:space-between;padding:0.3rem 0;font-size:0.9rem;border-bottom:1px solid var(--border)}
+    .info-row:last-child{border-bottom:none}
+    .info-row span:first-child{color:var(--brown-light)}
+    .info-row span:last-child{font-weight:600}
+    .checking{font-size:0.85rem;color:var(--brown-light);margin-top:0.5rem;min-height:1.4em}
   </style>
 </head>
 <body>
@@ -35,6 +36,7 @@
       <div class="info-row"><span>Metodo di pagamento</span><span id="metodo-display">–</span></div>
       <div class="info-row"><span>Stato</span><span id="stato-display">–</span></div>
     </div>
+    <p class="checking" id="checking-msg"></p>
     <a href="/" class="btn btn-outline" style="margin-top:1rem">← Torna alla home</a>
   </div>
 </div>
@@ -43,15 +45,56 @@ const params = new URLSearchParams(window.location.search);
 const id = params.get('id');
 const nome = params.get('nome');
 const metodo = params.get('metodo');
+const metodiLabel = { paypal:'💳 PayPal', satispay:'📱 Satispay', secretariat:'🏛️ Pagamento in segreteria', waitlist:'📋 Lista d\'attesa' };
+
 document.getElementById('nome-display').textContent = nome || '';
 document.getElementById('booking-id').textContent = id ? '#' + id.substring(0,8).toUpperCase() : '–';
-const metodiLabel = { paypal:'💳 PayPal', satispay:'📱 Satispay', secretariat:'🏛️ Pagamento in segreteria', waitlist:'📋 Lista d\'attesa' };
-const statiLabel = { paypal:'<span class="badge badge-paid">✅ Pagato</span>', satispay:'<span class="badge badge-pending">⏳ In attesa</span>', secretariat:'<span class="badge badge-secretariat">🏛️ Da pagare in segreteria</span>', waitlist:'<span class="badge badge-pending">📋 In lista d\'attesa</span>' };
 document.getElementById('metodo-display').textContent = metodiLabel[metodo] || metodo;
-document.getElementById('stato-display').innerHTML = statiLabel[metodo] || '–';
-if (metodo === 'waitlist') { document.getElementById('big-icon').textContent = '📋'; document.getElementById('grazie-title').textContent = 'Sei in lista d\'attesa!'; }
-if (metodo === 'satispay') { document.getElementById('big-icon').textContent = '⏳'; document.getElementById('grazie-title').textContent = 'Prenotazione ricevuta – pagamento in attesa'; }
-if (metodo === 'secretariat') { document.getElementById('big-icon').textContent = '📋'; document.getElementById('grazie-title').textContent = 'Prenotazione registrata!'; }
+
+function applyStatus(status) {
+  if (status === 'paid') {
+    document.getElementById('big-icon').textContent = '✅';
+    document.getElementById('grazie-title').textContent = 'Pagamento confermato!';
+    document.getElementById('stato-display').innerHTML = '<span class="badge badge-paid">✅ Pagato</span>';
+    document.getElementById('checking-msg').textContent = '';
+  } else if (status === 'waitlist') {
+    document.getElementById('big-icon').textContent = '📋';
+    document.getElementById('grazie-title').textContent = 'Sei in lista d\'attesa!';
+    document.getElementById('stato-display').innerHTML = '<span class="badge badge-pending">📋 In lista d\'attesa</span>';
+  } else if (status === 'pending_secretariat' || metodo === 'secretariat') {
+    document.getElementById('big-icon').textContent = '📋';
+    document.getElementById('grazie-title').textContent = 'Prenotazione registrata!';
+    document.getElementById('stato-display').innerHTML = '<span class="badge badge-secretariat">🏛️ Da pagare in segreteria</span>';
+  } else if (status === 'pending_satispay' || metodo === 'satispay') {
+    document.getElementById('big-icon').textContent = '⏳';
+    document.getElementById('grazie-title').textContent = 'Pagamento in verifica...';
+    document.getElementById('stato-display').innerHTML = '<span class="badge badge-pending">⏳ Verifica in corso</span>';
+  } else {
+    document.getElementById('stato-display').innerHTML = '<span class="badge badge-pending">⏳ In attesa</span>';
+  }
+}
+
+// Stato iniziale
+if (metodo === 'secretariat') applyStatus('pending_secretariat');
+else if (metodo === 'waitlist') applyStatus('waitlist');
+else if (metodo === 'satispay') applyStatus('pending_satispay');
+else if (metodo === 'paypal') applyStatus('paid');
+else applyStatus('');
+
+// Per Satispay: interroga il db per avere lo stato reale aggiornato
+if (metodo === 'satispay' && id) {
+  document.getElementById('checking-msg').textContent = '⏳ Verifica pagamento in corso...';
+  async function checkStatus(attempts) {
+    try {
+      const res = await fetch('/api/get-booking?id=' + id);
+      const data = await res.json();
+      if (data.status === 'paid') { applyStatus('paid'); return; }
+    } catch(e) {}
+    if (attempts < 5) setTimeout(() => checkStatus(attempts + 1), 2000 * (attempts + 1));
+    else document.getElementById('checking-msg').textContent = 'Se hai pagato, la prenotazione sarà confermata a breve.';
+  }
+  setTimeout(() => checkStatus(0), 3000);
+}
 </script>
 </body>
 </html>
