@@ -67,7 +67,9 @@ Vai su **Project configuration → Environment variables** e aggiungi:
 | `JSONBIN_API_KEY` | `...` | Master Key da jsonbin.io |
 | `JSONBIN_CONFIG_BIN_ID` | `...` | Bin ID del bin `pranzo-config` |
 | `JSONBIN_BOOKINGS_BIN_ID` | `...` | Bin ID del bin `pranzo-bookings` |
-| `SITE_URL` | `https://polentata-slg.netlify.app` | URL del sito (per Satispay) |
+| `JSONBIN_SATISPAY_BIN_ID` | `...` | Bin ID del bin `pranzo-satispay` |
+| `SATISPAY_ACTIVATION_CODE` | `...` | Codice attivazione Satispay (monouso) |
+| `SITE_URL` | `https://polentata-slg.netlify.app` | URL del sito (per redirect Satispay) |
 
 Dopo averle aggiunte: **Deploys → Trigger deploy**.
 
@@ -103,17 +105,16 @@ Il sistema usa l'integrazione API completa: crea transazioni al volo, reindirizz
 
 ### Setup (una sola volta)
 
-1. Dal pannello **Satispay Business → negozio e-commerce** → genera un **codice di attivazione**
-2. Su Netlify aggiungi la variabile: `SATISPAY_ACTIVATION_CODE` = il codice
-3. Fai un deploy
-4. Vai su `/admin/satispay-setup.html`
-5. Clicca **"Genera e registra chiavi"**
-6. Copia i valori ottenuti e aggiungili come variabili d'ambiente:
-   - `SATISPAY_KEY_ID` = il keyId restituito
-   - `SATISPAY_PRIVATE_KEY` = la private key restituita
-7. Fai un nuovo deploy
+1. Su **jsonbin.io** crea un bin `pranzo-satispay` con contenuto `{"init": true}` e copia il Bin ID
+2. Su Netlify aggiungi `JSONBIN_SATISPAY_BIN_ID` con il Bin ID appena creato
+3. Dal pannello **Satispay Business → negozio e-commerce** → genera un **codice di attivazione**
+4. Su Netlify aggiungi `SATISPAY_ACTIVATION_CODE` = il codice (è monouso!)
+5. Fai un deploy
+6. Vai su `/admin/satispay-setup.html`
+7. Clicca **"Genera e registra chiavi"** — salva tutto automaticamente nel bin dedicato
+8. Clicca **"Verifica credenziali"** per confermare che tutto funzioni
 
-> ⚠️ La **Private Key** viene mostrata una sola volta — salvala in un posto sicuro!
+> ⚠️ Il codice di attivazione è **monouso** — se il setup fallisce, genera un nuovo codice su Satispay Business prima di riprovare.
 
 ---
 
@@ -164,11 +165,14 @@ Password: quella impostata in `ADMIN_PASSWORD` su Netlify.
 
 Il sistema usa [JSONBin.io](https://jsonbin.io) come database (piano gratuito).
 
-Crea due bin su jsonbin.io:
+Crea tre bin su jsonbin.io:
 - `pranzo-config` con contenuto iniziale `{"init": true}`
 - `pranzo-bookings` con contenuto iniziale `{"bookings": []}`
+- `pranzo-satispay` con contenuto iniziale `{"init": true}` (per le chiavi API Satispay)
 
 Copia i **Bin ID** e la **Master Key** nelle variabili d'ambiente Netlify.
+
+> ⚠️ Le chiavi Satispay vengono salvate nel bin `pranzo-satispay` separato per evitare problemi di troncamento della risposta con bin troppo grandi.
 
 ---
 
