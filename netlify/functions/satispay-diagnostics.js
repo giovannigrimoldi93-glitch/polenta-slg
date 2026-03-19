@@ -27,9 +27,11 @@ exports.handler = async (event) => {
   }
 
   try {
-    const config = await jsonbinGet(process.env.JSONBIN_CONFIG_BIN_ID, process.env.JSONBIN_API_KEY);
+    const config = await jsonbinGet(process.env.JSONBIN_SATISPAY_BIN_ID, process.env.JSONBIN_API_KEY);
+    console.log('diagnostics: config keys=', Object.keys(config));
+    console.log('diagnostics: satispayKeyId type=', typeof config.satispayKeyId, 'value snippet=', String(config.satispayKeyId || '').substring(0, 30));
     const hasKeys = !!(config.satispayKeyId && config.satispayPrivateKey);
-    console.log('diagnostics: hasKeys=', hasKeys, 'keyId=', config.satispayKeyId?.substring(0, 20));
+    console.log('diagnostics: hasKeys=', hasKeys);
 
     return {
       statusCode: 200,

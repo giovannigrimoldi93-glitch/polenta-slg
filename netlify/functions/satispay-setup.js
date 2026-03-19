@@ -53,13 +53,11 @@ exports.handler = async (event) => {
     const keyId = satispayData.key_id;
     console.log('Satispay keyId ottenuto:', keyId);
 
-    // Salva su JSONBin — MERGE con config esistente, non sovrascrivere
+    // Salva su bin dedicato per le chiavi Satispay
     const apiKey = process.env.JSONBIN_API_KEY;
-    const configBinId = process.env.JSONBIN_CONFIG_BIN_ID;
-    const existingConfig = await jsonbinGet(configBinId, apiKey);
-    const newConfig = { ...existingConfig, satispayKeyId: keyId, satispayPrivateKey: privateKey };
-    await jsonbinPut(configBinId, apiKey, newConfig);
-    console.log('Chiavi salvate su JSONBin');
+    const satispayBinId = process.env.JSONBIN_SATISPAY_BIN_ID;
+    await jsonbinPut(satispayBinId, apiKey, { satispayKeyId: keyId, satispayPrivateKey: privateKey });
+    console.log('Chiavi salvate su bin Satispay dedicato');
 
     return { statusCode: 200, headers: CORS, body: JSON.stringify({ ok: true, keyId, message: 'Chiavi generate e salvate!' }) };
   } catch(e) {

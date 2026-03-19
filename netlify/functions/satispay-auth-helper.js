@@ -4,15 +4,15 @@ const SATISPAY_HOST = 'authservices.satispay.com';
 const SATISPAY_BASE = 'https://authservices.satispay.com';
 
 async function getSatispayCredentials() {
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${process.env.JSONBIN_CONFIG_BIN_ID}/latest`, {
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${process.env.JSONBIN_SATISPAY_BIN_ID}/latest`, {
     headers: { 'X-Master-Key': process.env.JSONBIN_API_KEY }
   });
   const data = await res.json();
-  const config = data.record || {};
-  if (!config.satispayKeyId || !config.satispayPrivateKey) {
+  const record = data.record || {};
+  if (!record.satispayKeyId || !record.satispayPrivateKey) {
     throw new Error('Credenziali Satispay non trovate nel database');
   }
-  return { keyId: config.satispayKeyId, privateKeyPem: config.satispayPrivateKey };
+  return { keyId: record.satispayKeyId, privateKeyPem: record.satispayPrivateKey };
 }
 
 function buildAuthHeader(method, path, body, keyId, privateKeyPem) {
